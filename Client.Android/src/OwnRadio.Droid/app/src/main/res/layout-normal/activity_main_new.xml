@@ -24,7 +24,9 @@
 	<android.support.constraint.ConstraintLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@android:color/white">
+		android:background="@android:color/white"
+        android:id="@+id/main_layout"
+        >
 
 		<ViewStub
 			android:id="@+id/viewStubRate"
@@ -32,20 +34,21 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom"
 			android:inflatedId="@+id/rateRequestLayout"
-			android:layout="@layout/feedback_request_1"/>
+			android:layout="@layout/feedback_request_1" />
 
 		<ImageButton
 			android:id="@+id/btnMenu"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_width="35dp"
+			android:layout_height="48dp"
 			android:layout_marginStart="16dp"
-			android:layout_marginTop="16dp"
+			android:layout_marginTop="12dp"
 			android:background="?selectableItemBackgroundBorderless"
-			android:contentDescription="TODO" android:elevation="10dp"
+			android:contentDescription="TODO"
+			android:elevation="10dp"
 			android:tintMode="src_in"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
-			app:srcCompat="@drawable/ic_menu_24dp"/>
+			app:srcCompat="@drawable/ic_menu_24dp" />
 
 		<TextView
 			android:id="@+id/trackTitle"
@@ -53,12 +56,13 @@
 			android:layout_height="wrap_content"
 			android:layout_centerHorizontal="true"
 			android:layout_marginLeft="8dp"
-			android:layout_marginRight="8dp"
 			android:layout_marginTop="104dp"
+			android:layout_marginRight="8dp"
 			android:clickable="true"
 			android:contentDescription="@string/currently_playing_artist"
 			android:ellipsize="end"
-			android:focusable="true" android:fontFamily="sans-serif"
+			android:focusable="true"
+			android:fontFamily="sans-serif"
 			android:maxLines="1"
 			android:textAlignment="center"
 			android:textAppearance="?android:attr/textAppearanceMedium"
@@ -75,20 +79,21 @@
 			android:layout_below="@+id/trackTitle"
 			android:layout_centerHorizontal="true"
 			android:layout_marginLeft="8dp"
-			android:layout_marginRight="8dp"
 			android:layout_marginTop="8dp"
+			android:layout_marginRight="8dp"
 			android:clickable="true"
 			android:contentDescription="@string/currently_playing_song"
 			android:ellipsize="end"
 
-			android:focusable="true" android:fontFamily="sans-serif-light"
+			android:focusable="true"
+			android:fontFamily="sans-serif-light"
 			android:maxLines="1"
 			android:textAlignment="center"
 			android:textAppearance="?android:attr/textAppearanceSmall"
 			android:textColor="@color/textColorPrimaryDark"
 			app:layout_constraintEnd_toEndOf="@+id/trackTitle"
 			app:layout_constraintStart_toStartOf="@+id/trackTitle"
-			app:layout_constraintTop_toBottomOf="@+id/trackTitle"/>
+			app:layout_constraintTop_toBottomOf="@+id/trackTitle" />
 
 		<ImageButton
 			android:id="@+id/btnPlayPause"
@@ -97,13 +102,16 @@
 			android:layout_alignParentStart="true"
 			android:layout_centerVertical="true"
 			android:layout_marginTop="56dp"
+			android:layout_marginBottom="250dp"
 			android:background="?selectableItemBackgroundBorderless"
-			android:contentDescription="TODO" android:elevation="10dp"
+			android:contentDescription="TODO"
+			android:elevation="10dp"
 			android:tintMode="src_in"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/trackArtist"
-			app:srcCompat="@drawable/btn_ic_play"/>
+			app:srcCompat="@drawable/btn_ic_play" />
 
 		<ImageButton
 			android:id="@+id/btnNext"
@@ -113,26 +121,14 @@
 			android:layout_centerVertical="true"
 			android:layout_marginTop="40dp"
 			android:background="?selectableItemBackgroundBorderless"
-			android:contentDescription="TODO" android:elevation="10dp"
+			android:contentDescription="TODO"
+			android:elevation="10dp"
 			android:tintMode="src_in"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_bias="0.5"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/btnPlayPause"
-			app:srcCompat="@drawable/btn_ic_next"/>
-
-		<ImageView
-			android:layout_width="36dp"
-			android:layout_height="35dp"
-			android:layout_marginEnd="12dp"
-			android:layout_marginBottom="48dp"
-			android:contentDescription="TODO"
-			android:cropToPadding="false"
-			android:onClick="onCopyLink"
-			android:text="Copy"
-			app:layout_constraintBottom_toTopOf="@+id/trackTitle"
-			app:layout_constraintEnd_toEndOf="@+id/trackTitle"
-			app:srcCompat="@drawable/ic_share" />
+			app:srcCompat="@drawable/btn_ic_next" />
 
 		<ImageButton
 			android:id="@+id/btnAlarmClock"
@@ -140,22 +136,28 @@
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"
 			android:layout_marginTop="5dp"
+			android:layout_marginBottom="24dp"
 			android:background="@android:color/white"
+			android:contentDescription="TODO"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintStart_toStartOf="@+id/btnPlayPause"
 			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft"
-			android:contentDescription="TODO" app:srcCompat="@drawable/ic_bud"/>
+			app:srcCompat="@drawable/ic_bud" />
 
 
 		<ImageButton
 			android:id="@+id/btnTimer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:layout_marginEnd="8dp"
 			android:layout_marginTop="5dp"
+			android:layout_marginEnd="8dp"
+			android:layout_marginBottom="24dp"
 			android:background="@android:color/white"
+			android:contentDescription="TODO"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="@+id/btnPlayPause"
 			app:layout_constraintTop_toBottomOf="@+id/tProgressRight"
-			android:contentDescription="TODO" app:srcCompat="@drawable/ic_tim"/>
+			app:srcCompat="@drawable/ic_tim" />
 
 
 		<TextView
@@ -165,47 +167,79 @@
 			android:text="Наполнение кеша:"
 			android:visibility="gone"
 			app:layout_constraintStart_toStartOf="@+id/tProgressLeft"
-			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft"/>
+			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft" />
 
-		<ProgressBar
-			android:id="@+id/progressBar"
-			style="?android:attr/progressBarStyleHorizontal"
-			android:layout_width="0dp"
-			android:layout_height="5dp"
-			android:layout_marginBottom="8dp"
-			android:layout_marginEnd="24dp"
-			android:layout_marginStart="24dp"
-			android:indeterminate="false"
-			android:progressDrawable="@drawable/progress_bar"
-			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintEnd_toEndOf="parent"
-			app:layout_constraintStart_toStartOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/btnNext"/>
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="5dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="24dp"
+            android:indeterminate="false"
+
+            android:progressDrawable="@drawable/progress_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnNext"
+            app:layout_constraintVertical_bias="0.75" />
 
 		<TextView
 			android:id="@+id/tProgressLeft"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:background="@color/real_white_color"
+			android:textColor="@color/main_gray_color"
 			app:layout_constraintStart_toStartOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<TextView
 			android:id="@+id/tProgressRight"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textColor="@color/main_gray_color"
 			app:layout_constraintEnd_toEndOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<include
 			android:id="@+id/devInfo"
 			layout="@layout/content_main"
 			android:layout_width="match_parent"
 			android:layout_height="0dp"
-			android:layout_marginBottom="8dp"
 			android:layout_marginTop="8dp"
+			android:layout_marginBottom="8dp"
 			android:visibility="gone"
 			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/trackArtist"/>
+			app:layout_constraintTop_toBottomOf="@+id/trackArtist" />
+
+        <ImageButton
+            android:id="@+id/buttonShareTrack"
+            style="@style/Widget.AppCompat.ImageButton"
+            android:layout_width="51dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="8dp"
+            android:background="@color/ColorTransparent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_share" />
+
+		<ImageButton
+			android:id="@+id/rateAppBtn"
+			style="@style/RateButtonTheme"
+			android:layout_width="50dp"
+			android:layout_height="41dp"
+			android:layout_marginStart="8dp"
+			android:layout_marginEnd="24dp"
+			android:layout_marginBottom="12dp"
+			app:layout_constraintBottom_toTopOf="@+id/progressBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="1.0"
+			app:layout_constraintStart_toStartOf="parent"
+			app:srcCompat="@drawable/ic_star_popup" />
+
 	</android.support.constraint.ConstraintLayout>
 
 </android.support.v4.widget.DrawerLayout>

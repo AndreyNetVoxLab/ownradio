@@ -22,10 +22,10 @@
 
 		<TextView
 			android:id="@+id/textView"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="10dp"
-			android:text="Укажите через какое время должен включиться будильник"
+			android:text="Укажите время срабатывания будильника"
 			android:textAlignment="center"
 			android:textColor="#000" />
 
@@ -320,7 +320,7 @@
 
 		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
+			android:layout_height="109dp"
 			android:layout_marginTop="20dp"
 			android:orientation="vertical">
 
@@ -330,8 +330,8 @@
 				android:layout_height="50dp"
 				android:layout_gravity="center_horizontal"
 				android:contentDescription="TODO"
-				android:onClick="btnStartClock"
 				app:srcCompat="@drawable/ic_blu_bud" />
+			<!--android:onClick="btnStartClock"-->
 
 			<TextView
 				android:id="@+id/txtProgress"

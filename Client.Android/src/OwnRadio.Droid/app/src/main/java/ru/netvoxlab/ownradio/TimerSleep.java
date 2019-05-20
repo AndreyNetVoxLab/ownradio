@@ -1,7 +1,10 @@
 package ru.netvoxlab.ownradio;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +17,9 @@ import android.widget.Toast;
 
 import com.jesusm.holocircleseekbar.lib.HoloCircleSeekBar;
 
+
+import static ru.netvoxlab.ownradio.Constants.IS_TIMER_WORK;
+import static ru.netvoxlab.ownradio.Constants.TIMER_TIME;
 /**
  * Created by valko on 19.09.2018
  */
@@ -34,7 +40,9 @@ public class TimerSleep extends AppCompatActivity {
 	private TextView txtProgress;
 	private Toolbar toolbar;
 	private HoloCircleSeekBar picker;
-	
+
+
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		//Меняем тему, используемую при запуске приложения, на основную
@@ -65,7 +73,24 @@ public class TimerSleep extends AppCompatActivity {
 				onBackPressed();
 			}
 		});
-		
+
+		final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+		final SharedPreferences.Editor prefEditor = prefs.edit();
+
+
+		//если таймер установлен
+		if(prefs.getBoolean(IS_TIMER_WORK, false)){
+		    timeSeconds = prefs.getInt(TIMER_TIME, 0);
+		    picker.setValue(timeSeconds / 60);
+			SetTextTime(timeSeconds / 60);
+            btnGo.setImageResource(R.drawable.ic_blu_bud);
+            isEnableTimer = prefs.getBoolean(IS_TIMER_WORK, false);
+			StartTimer(this);
+        }
+        else{
+            btnGo.setImageResource(R.drawable.ic_grey_bud);
+        }
+
 		btnGo.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -76,25 +101,34 @@ public class TimerSleep extends AppCompatActivity {
 					timer.cancel();
 					Toast.makeText(getApplicationContext(), "Таймер успешно остановлен", Toast.LENGTH_SHORT).show();
 					btnGo.setImageResource(R.drawable.ic_grey_bud);
+					prefEditor.putBoolean(IS_TIMER_WORK, false);
 				} else {
 					// иначе запускаем таймер
-					StartTimer();
+					StartTimer(getApplicationContext());
 					Toast.makeText(getApplicationContext(), "Таймер успешно запущен", Toast.LENGTH_SHORT).show();
+					prefEditor.putBoolean(IS_TIMER_WORK, true);
+					prefEditor.putInt(TIMER_TIME, timeSeconds);
+					btnGo.setImageResource(R.drawable.ic_blu_bud);
 				}
+				prefEditor.apply();
 			}
 		});
 		
 		picker.setOnSeekBarChangeListener(new HoloCircleSeekBar.OnCircleSeekBarChangeListener() {
 			@Override
 			public void onProgressChanged(HoloCircleSeekBar holoCircleSeekBar, int progress, boolean b) {
-				SetTextTime(progress);
+				if(progress > 0){
+					SetTextTime(progress);
+				}
 			}
 			
 			@Override
 			public void onStartTrackingTouch(HoloCircleSeekBar holoCircleSeekBar) {
 				// по нажатию на seekbar обновляем его значение
 				int progress = holoCircleSeekBar.getValue();
-				SetTextTime(progress);
+				if(progress > 0){
+					SetTextTime(progress);
+				}
 			}
 			
 			@Override
@@ -119,7 +153,7 @@ public class TimerSleep extends AppCompatActivity {
 		// если время таймера текущее отличается от seekbar и таймер идет, то перезапускаем его
 		if (currentTime != timeSeconds && isEnableTimer) {
 			timer.cancel();
-			StartTimer();
+			StartTimer(getApplicationContext());
 			Toast.makeText(getApplicationContext(), "Таймер успешно перезапущен", Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -136,7 +170,7 @@ public class TimerSleep extends AppCompatActivity {
 		timeSeconds = progress * 60;
 	}
 	
-	private void StartTimer() {
+	public void StartTimer(final Context context) {
 		currentTime = timeSeconds;
 		
 		// создаем таймер
@@ -159,9 +193,14 @@ public class TimerSleep extends AppCompatActivity {
 				
 				btnGo.setImageResource(R.drawable.ic_blu_bud);
 			}
-			
+
+
 			public void onFinish() {
 				setResult(RESULT_OK, new Intent());
+				final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+				final SharedPreferences.Editor prefEditor = prefs.edit();
+				prefEditor.putBoolean(IS_TIMER_WORK, false);
+				prefEditor.apply();
 				finish();
 			}
 		};

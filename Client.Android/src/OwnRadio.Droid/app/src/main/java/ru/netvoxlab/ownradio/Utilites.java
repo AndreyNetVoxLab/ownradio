@@ -2,6 +2,7 @@ package ru.netvoxlab.ownradio;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -50,7 +51,13 @@ public class Utilites {
 					downloaderIntent.setAction(ACTION_GETNEXTTRACK);
 					downloaderIntent.putExtra(EXTRA_DEVICEID, DeviceId);
 					downloaderIntent.putExtra(EXTRA_COUNT, 3);
-					mContext.startService(downloaderIntent);
+
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+						mContext.startForegroundService(downloaderIntent);
+					}else{
+						mContext.startService(downloaderIntent);
+					}
+
 				} else {
 					mContext.sendBroadcast(new Intent(ActionCheckCountTracksAndDownloadIfNotEnought));
 				}
@@ -80,7 +87,14 @@ public class Utilites {
 			logSenderIntent.setAction(ACTION_SENDLOGS);
 			logSenderIntent.putExtra(EXTRA_DEVICEID, deviceId); //getApplicationContext()).execute(sp.getString("DeviceID", "")
 			logSenderIntent.putExtra(EXTRA_LOGFILEPATH, logFile.getAbsolutePath());
-			mContext.startService(logSenderIntent);
+
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				mContext.startForegroundService(logSenderIntent);
+			}else{
+				mContext.startService(logSenderIntent);
+			}
+
 			Toast.makeText(mContext, mContext.getResources().getString(R.string.log_is_send), Toast.LENGTH_SHORT).show();
 			return true;
 		}catch (Exception ex){

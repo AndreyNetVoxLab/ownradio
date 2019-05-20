@@ -40,7 +40,7 @@ class ItemViewController: UIViewController {
 		loadIndicator.isHidden = isIndicatorHide
 		countTryingLbl.isHidden = isCountTryingHide
 		
-		pageControl.numberOfPages = StartVideoViewController.sharedInstance.contentLabels.count
+//		pageControl.numberOfPages = StartVideoViewController.sharedInstance.contentLabels.count
 		pageControl.currentPage = itemIndex
 		
 		countTryingLbl.text = "(\(countTrying) попытка кеширования)"
@@ -58,8 +58,8 @@ class ItemViewController: UIViewController {
 		loadIndicator.isHidden = false
 		tryAgainBtn.isHidden = true
 		countTryingLbl.isHidden = false
-		contentLbl.text = StartVideoViewController.sharedInstance.getContentLblByIndex(index: itemIndex)
-		StartVideoViewController.sharedInstance.timerStart()
+//		contentLbl.text = StartVideoViewController.sharedInstance.getContentLblByIndex(index: itemIndex)
+//		StartVideoViewController.sharedInstance.timerStart()
 		DispatchQueue.global(qos: .background).async {
 			Downloader.sharedInstance.load(isSelfFlag: false, complition: {
 				

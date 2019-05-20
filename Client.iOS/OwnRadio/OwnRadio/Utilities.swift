@@ -39,7 +39,7 @@ extension NSObject:Utilities{
 	
 	var currentReachabilityStatus: ReachabilityStatus {
 		
-		let isOnlyWiFi = UserDefaults.standard.object(forKey: "isOnlyWiFi") as? Bool
+		//let isOnlyWiFi = UserDefaults.standard.object(forKey: "isOnlyWiFi") as? Bool
 		var zeroAddress = sockaddr_in()
 		zeroAddress.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
 		zeroAddress.sin_family = sa_family_t(AF_INET)
@@ -63,12 +63,7 @@ extension NSObject:Utilities{
 		}
 		else if flags.contains(.isWWAN) == true {
 			// WWAN connections are OK if the calling application is using the CFNetwork APIs.
-			// Если в настройках задано "только wifi" - возвращаем "нет подключения"
-			if isOnlyWiFi == false {
-				return .reachableViaWWAN
-			} else {
-				return .notReachable
-			}
+			return .reachableViaWWAN
 		}
 		else if flags.contains(.connectionRequired) == false {
 			// If the target host is reachable and no connection is required then we'll assume that you're on Wi-Fi...

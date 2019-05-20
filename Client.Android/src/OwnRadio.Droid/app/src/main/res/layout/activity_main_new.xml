@@ -7,6 +7,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:fitsSystemWindows="true"
+
 	>
 	
 	<android.support.design.widget.NavigationView
@@ -15,6 +16,7 @@
 		android:layout_height="match_parent"
 		android:layout_gravity="start"
 		android:fitsSystemWindows="true"
+
 		app:itemIconTint="@color/menu_icon_color"
 		app:itemTextColor="@color/menu_text_color"
 		app:headerLayout="@layout/nav_header_main"
@@ -23,9 +25,36 @@
 	
 	<android.support.constraint.ConstraintLayout
 		android:layout_width="match_parent"
+		android:id="@+id/main_layout"
 		android:layout_height="match_parent"
 		android:background="@android:color/white">
-		
+
+        <ImageButton
+            android:id="@+id/rateAppBtn"
+            android:layout_width="50dp"
+            android:layout_height="41dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="12dp"
+            style="@style/RateButtonTheme"
+            app:srcCompat="@drawable/ic_star_popup"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.947"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+			android:id="@+id/buttonShareTrack2"
+			style="@style/Widget.AppCompat.ImageButton"
+			android:layout_width="51dp"
+			android:layout_height="42dp"
+			android:layout_marginTop="16dp"
+			android:layout_marginEnd="16dp"
+			android:background="@color/ColorTransparent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:srcCompat="@drawable/ic_share" />
+
 		<ViewStub
 			android:id="@+id/viewStubRate"
 			android:layout_width="wrap_content"
@@ -121,19 +150,6 @@
 			app:layout_constraintTop_toBottomOf="@+id/btnPlayPause"
 			app:srcCompat="@drawable/btn_ic_next"/>
 
-		<ImageView
-			android:layout_width="36dp"
-			android:layout_height="35dp"
-			android:layout_marginEnd="12dp"
-			android:layout_marginBottom="48dp"
-			android:contentDescription="TODO"
-			android:cropToPadding="false"
-			android:onClick="onCopyLink"
-			android:text="Copy"
-			app:layout_constraintBottom_toTopOf="@+id/trackTitle"
-			app:layout_constraintEnd_toEndOf="@+id/trackTitle"
-			app:srcCompat="@drawable/ic_share" />
-		
 		<ImageButton
 			android:id="@+id/btnAlarmClock"
 			android:layout_width="wrap_content"

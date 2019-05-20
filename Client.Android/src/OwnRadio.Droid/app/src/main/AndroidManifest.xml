@@ -64,7 +64,9 @@
 			<!-- &lt;!&ndash; <data android:scheme="file" /> &ndash;&gt; -->
 			<!-- </intent-filter> -->
 		</activity>
-		
+		<activity android:name=".GoogleLoginActivity"
+			android:label="Войти через Google"
+			android:screenOrientation="portrait" />
 		<service
 			android:name=".MediaPlayerService" android:permission="" 
 			android:enabled="true"
@@ -138,6 +140,11 @@
 			</intent-filter>
 		</activity>
 		<activity
+			android:name=".DebugInfoView"
+			android:label="Debug info"
+			android:screenOrientation="portrait">
+		</activity>
+		<activity
 			android:name=".AppInfoActivity"
 			android:label="@string/pref_header_about_app"
 			android:screenOrientation="portrait" />
@@ -161,6 +168,13 @@
 			android:name=".TimerSleep"
 			android:label="Таймер сна"></activity>
 		<activity android:name=".AlarmClock" android:label="@string/alarm_clock_header"></activity>
+
+		<activity android:name=".RatePopup"
+			android:theme="@style/AppTheme.RatePopupTheme"></activity>
+		<activity android:name=".RateThanksPopup"
+			android:theme="@style/AppTheme.RatePopupTheme"></activity>
+		<activity android:name=".RateNotLike"
+			android:theme="@style/AppTheme.RatePopupTheme"></activity>
 
 		<receiver android:name=".AlarmReceiver">
 			<intent-filter>

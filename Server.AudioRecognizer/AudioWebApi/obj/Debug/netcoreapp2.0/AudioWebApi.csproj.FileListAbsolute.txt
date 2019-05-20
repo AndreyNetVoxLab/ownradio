@@ -33,3 +33,15 @@ C:\Users\niQ\Desktop\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netco
 C:\Users\niQ\Desktop\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.AssemblyInfo.cs
 C:\Users\niQ\Desktop\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.dll
 C:\Users\niQ\Desktop\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.pdb
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\bin\Debug\netcoreapp2.0\AudioWebApi.deps.json
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\bin\Debug\netcoreapp2.0\AudioWebApi.runtimeconfig.json
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\bin\Debug\netcoreapp2.0\AudioWebApi.runtimeconfig.dev.json
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\bin\Debug\netcoreapp2.0\AudioWebApi.dll
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\bin\Debug\netcoreapp2.0\AudioWebApi.pdb
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.csprojAssemblyReference.cache
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.csproj.CoreCompileInputs.cache
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\UserSecretsAssemblyInfo.cs
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.AssemblyInfoInputs.cache
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.AssemblyInfo.cs
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.dll
+C:\Users\aserov\Documents\GitHub\ownradio\Server.AudioRecognizer\AudioWebApi\obj\Debug\netcoreapp2.0\AudioWebApi.pdb

@@ -8,8 +8,9 @@
 	<string name="navigation_drawer_open">Open navigation drawer</string>
 	<string name="navigation_drawer_close">Close navigation drawer</string>
 	<string name="action_settings">Настройки</string>
-	
-	
+	<string name="myTracks">Свои треки</string>
+	<string name="reccomendedTracks">Рекомендации</string>
+	<string name="ratio_pref">Слушать</string>
 	<string name="label_pause">Pause</string>
 	<string name="label_play">Play</string>
 	<string name="label_next">Next</string>
@@ -90,16 +91,19 @@
 	<string name="alarm_clock">Будильник </string>
 	
 	<!-- Settings -->
-	<string name="pref_header_internet_connection">Подключение к интернету</string>
+	<string name="pref_header_internet_connection">Оптимизация трафика</string>
 	
 	<string-array name="pref_internet_connection_titles">
-		<item>@string/pref_only_wifi</item>
-		<item>@string/pref_mobile_and_wifi</item>
+		<item>@string/optimize_on</item>
+		<item>@string/optimize_off</item>
 	</string-array>
 	<string-array name="pref_internet_connection_values">
-		<item>0</item>
 		<item>1</item>
+		<item>0</item>
 	</string-array>
+
+	<string name="optimize_on">Включено</string>
+	<string name="optimize_off">Выключено</string>
 	<string name="pref_only_wifi">Только wifi</string>
 	<string name="pref_mobile_and_wifi">Moб. интернет и wifi</string>
 	
@@ -145,6 +149,7 @@
 		<item>8</item>
 		<item>9</item>
 	</string-array>
+	<string name="pref_total_space_tracks">треков</string>
 	<string name="pref_percent_of_free_memory1">А также не более 30%% от свободной памяти</string>
 	<string name="pref_percent_of_free_memory">А также не более 30% от свободной памяти</string>
 	<string name="from_free_memory">*от свободной памяти</string>

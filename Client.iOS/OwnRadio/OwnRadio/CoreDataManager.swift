@@ -158,8 +158,8 @@ class CoreDataManager {
 				if track.trackId == buff {
 					print("TRACKS IDs are equal!!! ")
 				}
-                ApiService.shared.saveHistory(historyId: track.recId!, trackId: track.trackId!, isListen: Int(track.isListen))
-				
+                //ApiService.shared.saveHistory(historyId: track.recId!, trackId: track.trackId!, isListen: Int(track.isListen))
+				RdevApiService().SaveHistory(historyId: track.recId!, trackId: track.trackId!, isListen: Int(track.isListen))
 				buff = track.trackId!
 			}
 		} catch {
@@ -261,7 +261,7 @@ class CoreDataManager {
 	}
 	
 	// получает трек с найбольшим кол-вом проигрываний
-	func getOldTrack (onlyListen: Bool) -> SongObject? {
+	func getOldTrack (onlyListen: Bool) -> [SongObject?]{
 		// устанавливаем сортировку по кол-ву поигрываний и по дате
 		let countSortDescriptor = NSSortDescriptor(key: "countPlay", ascending: false)
 		let dateSortDescriptor = NSSortDescriptor(key: "playingDate", ascending: true)
@@ -276,27 +276,30 @@ class CoreDataManager {
 		}else {
 			fetchRequest.predicate = NSPredicate(format: "countPlay >= %d", 0)
 		}
-		fetchRequest.fetchLimit = 1
-		let  song = SongObject()
+		fetchRequest.fetchLimit = 2
+		var songs = [SongObject]()
 		do {
 			// выполняем запрос и проверяем кол-во результатов
 			let searchResults = try self.managedObjectContext.fetch(fetchRequest)
 			guard searchResults.count != 0 else {
-				return nil
+				return [nil]
 			}
-			//берем первый обьект из результата
-			let track = searchResults.first
+			for result in searchResults{
+				let song = SongObject()
+				song.name = result.trackName
+				song.artistName = result.artistName
+				song.trackLength = result.trackLength
+				song.trackID = result.recId
+				song.path = result.path
+				songs.append(song)
+			}
 			
-			song.name = track?.trackName
-			song.artistName = track?.artistName
-			song.trackLength = track?.trackLength
-			song.trackID = track?.recId
-			song.path = track?.path
+			
 			
 		} catch {
 			print("Error with request: \(error)")
 		}
-		return song
+		return songs
 	}
 
     // возвращает время начала проигрывания трека с заданным trackId
@@ -351,12 +354,14 @@ class CoreDataManager {
 	// функция сохранения контекста
 	func saveContext () {
 		if managedObjectContext.hasChanges {
-			do {
-				try managedObjectContext.save()
-			} catch {
-				let nserror = error as NSError
-				NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
-				abort()
+			DispatchQueue.main.async {
+				do {
+					try self.managedObjectContext.save()
+				} catch {
+					let nserror = error as NSError
+					NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
+					abort()
+				}
 			}
 		}
 	}

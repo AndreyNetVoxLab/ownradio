@@ -15,7 +15,7 @@ import MediaPlayer
 class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnectionDataDelegate {
 	
 	var player: AVPlayer = AVPlayer()
-	var playerItem: AVPlayerItem!
+	@objc var playerItem: AVPlayerItem!
 	var asset: AVURLAsset?
 	static let sharedInstance = AudioPlayerManager()
 	
@@ -37,8 +37,15 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	var wasInterreption = false
     
     let tracksUrlString =  FileManager.applicationSupportDir().appending("/Tracks/")
-	
+	let budTracksUrlString = FileManager.applicationSupportDir().appending("/AlarmTracks/")
 	var isSkipped = false
+	let commandCenter = MPRemoteCommandCenter.shared()
+	let handler: (String) -> ((MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)) = { (name) in
+		return { (event) -> MPRemoteCommandHandlerStatus in
+			dump("\(name) \(event.timestamp) \(event.command)")
+			return .success
+		}
+	}
 	
 	// MARK: Overrides
 	override init() {
@@ -49,48 +56,68 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		NotificationCenter.default.addObserver(self, selector: #selector(playerItemDidReachEnd(_:)), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player.currentItem)
 		//проигрывание было прервано
 		NotificationCenter.default.addObserver(self, selector: #selector(crashNetwork(_:)), name: NSNotification.Name.AVPlayerItemFailedToPlayToEndTime, object: self.player.currentItem)
+		
+		
+		
 		setup()
 	}
 	
 	deinit {
-		
 		self.removeObserver(self, forKeyPath: #keyPath(AudioPlayerManager.playerItem.status))
 		
 		NotificationCenter.default.removeObserver(self, name:  NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: self.player.currentItem)
 		NotificationCenter.default.removeObserver(self, name:  NSNotification.Name.AVPlayerItemFailedToPlayToEndTime, object: self.player.currentItem)
 		NotificationCenter.default.removeObserver(self, name: Notification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
-	}
-	
-	func setup() {
-		let audioSession = AVAudioSession.sharedInstance()
 		
-		try! audioSession.setCategory(AVAudioSessionCategoryPlayback)
-		try! audioSession.setMode(AVAudioSessionModeDefault)
-		try! audioSession.setActive(true)
-		
-		UIApplication.shared.beginReceivingRemoteControlEvents()
-		
-		//Для того, чтобы убрать кнопку "назад" на заблокированном экране
-		//явно задаем отображаемые кнопки и функции, вызываемые по их нажатию
-		let commandCenter = MPRemoteCommandCenter.shared()
-		
-		let handler: (String) -> ((MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)) = { (name) in
-			return { (event) -> MPRemoteCommandHandlerStatus in
-				dump("\(name) \(event.timestamp) \(event.command)")
-				return .success
-			}
-		}
-		
-		commandCenter.nextTrackCommand.isEnabled = true
-		commandCenter.nextTrackCommand.addTarget(handler: handler("skipSong"))
+		commandCenter.nextTrackCommand.isEnabled = false
+		commandCenter.nextTrackCommand.removeTarget(handler("skipSong"))
 		
 		commandCenter.playCommand.isEnabled = true
-		commandCenter.playCommand.addTarget(handler: handler("resumeSong"))
+		commandCenter.playCommand.removeTarget(handler("resumeSong"))
 		
 		commandCenter.pauseCommand.isEnabled = true
-		commandCenter.pauseCommand.addTarget(handler: handler("pauseSong"))
+		commandCenter.pauseCommand.removeTarget(handler("pauseSong"))
 		
-		NotificationCenter.default.addObserver(self, selector: #selector(onAudioSessionEvent(_:)), name: Notification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
+//		NotificationCenter.default.removeObserver(self, name: Notification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
+	}
+	
+	
+	
+	func setup() {
+		do{
+			let audioSession = AVAudioSession.sharedInstance()
+			
+			try audioSession.setCategory(AVAudioSessionCategoryPlayback)
+			try audioSession.setMode(AVAudioSessionModeDefault)
+			try audioSession.setActive(true)
+			
+			UIApplication.shared.beginReceivingRemoteControlEvents()
+			
+			//Для того, чтобы убрать кнопку "назад" на заблокированном экране
+			//явно задаем отображаемые кнопки и функции, вызываемые по их нажатию
+			//let commandCenter = MPRemoteCommandCenter.shared()
+			
+//			let handler: (String) -> ((MPRemoteCommandEvent) -> (MPRemoteCommandHandlerStatus)) = { (name) in
+//				return { (event) -> MPRemoteCommandHandlerStatus in
+//					dump("\(name) \(event.timestamp) \(event.command)")
+//					return .success
+//				}
+//			}
+			
+			commandCenter.nextTrackCommand.isEnabled = true
+			commandCenter.nextTrackCommand.addTarget(handler: handler("skipSong"))
+			
+			commandCenter.playCommand.isEnabled = true
+			commandCenter.playCommand.addTarget(handler: handler("resumeSong"))
+			
+			commandCenter.pauseCommand.isEnabled = true
+			commandCenter.pauseCommand.addTarget(handler: handler("pauseSong"))
+			
+//			NotificationCenter.default.addObserver(self, selector: #selector(onAudioSessionEvent(_:)), name: Notification.Name.AVAudioSessionInterruption, object: AVAudioSession.sharedInstance())
+		}catch{
+			print("Audioplayermanager fail: \(error.localizedDescription)")
+			Downloader.sharedInstance.createPostNotificationSysInfo(message: "Audioplayermanager fail")
+		}
 	}
 	
 	// MARK: KVO
@@ -144,7 +171,30 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 							})
 						}
 					}
+					
+					let path = self.tracksUrlString.appending((self.playingSong.path!))
+					print(path)
+					if FileManager.default.fileExists(atPath: path) {
+						do{
+							// ApiService.shared.setTrackIsCorrect(trackId: self.playingSong.trackID, isCorrect: 0)
+							RdevApiService().SetIsCorrect(trackId: self.playingSong.trackID, isCorrect: false)
+							// удаляем обьект по пути
+							try FileManager.default.removeItem(atPath: path)
+							NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateSysInfo"), object: nil, userInfo: ["message":"Поврежденный файл удален"])
+							print("Поврежденный файл был удален")
+						}
+						catch {
+							print("Ошибка при удалении файла: файл не существует")
+						}
+					}
+					// удаляем трек с базы
+					CoreDataManager.instance.deleteTrackFor(trackID: self.playingSong.trackID)
+					CoreDataManager.instance.saveContext()
+					
+					print("Поврежденный файл был найден и удален")
+					NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateSysInfo"), object: nil, userInfo: ["message":"Поврежденный файл был удален"])
 				}
+				
 				break
 			case .unknown:
 				break
@@ -154,7 +204,7 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	
 	// MARK: Notification selectors
 	// трек дослушан до конца
-	func playerItemDidReachEnd(_ notification: Notification) {
+	@objc func playerItemDidReachEnd(_ notification: Notification) {
 
 		if notification.object as? AVPlayerItem  == player.currentItem {
             let dateLastTrackPlay = CoreDataManager.instance.getDateForTrackBy(trackId: self.playingSong.trackID)
@@ -167,9 +217,11 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
                     print(path)
                     if FileManager.default.fileExists(atPath: path) {
                         do{
-                            ApiService.shared.setTrackIsCorrect(trackId: self.playingSong.trackID, isCorrect: 0)
+                           // ApiService.shared.setTrackIsCorrect(trackId: self.playingSong.trackID, isCorrect: 0)
+							RdevApiService().SetIsCorrect(trackId: self.playingSong.trackID, isCorrect: false)
                             // удаляем обьект по пути
                             try FileManager.default.removeItem(atPath: path)
+							NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateSysInfo"), object: nil, userInfo: ["message":"Поврежденный файл удален"])
                             print("Поврежденный файл был удален")
                         }
                         catch {
@@ -194,7 +246,7 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	}
 	
 	//обработка прерывания аудиосессии
-	func onAudioSessionEvent(_ notification: Notification) {
+	@objc func onAudioSessionEvent(_ notification: Notification) {
 		
 		guard notification.name == Notification.Name.AVAudioSessionInterruption else {
 			return
@@ -232,6 +284,18 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		case .began: //interruption started
 			if self.isPlaying == true {
 				print("Began Playing - TRUE")
+				self.pauseSong {
+					if let rootController = UIApplication.shared.keyWindow?.rootViewController {
+						let navigationController = rootController as! UINavigationController
+						
+						if let radioViewContr = navigationController.topViewController  as? RadioViewController {
+							DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+								radioViewContr.updateUI()
+							})
+							
+						}
+					}
+				}
 			} else {
 				print("Began Playing - FALSE")
 				wasInterreption = true
@@ -239,7 +303,7 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		}
 	}
 	
-	func crashNetwork(_ notification: Notification) {
+	@objc func crashNetwork(_ notification: Notification) {
 		//		self.playerItem = nil
 		print("crashNetwork")
 		self.player.pause()
@@ -263,15 +327,17 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		songInfo[MPMediaItemPropertyPlaybackDuration] = song.trackLength //NSNumber.init(value: song.trackLength)
 		
 		MPNowPlayingInfoCenter.default().nowPlayingInfo = songInfo
+		UserDefaults.standard.set(song.name, forKey:"PlayingSongInfo")
+
 	}
 	
 	// MARK: Cotrol functions
 	//возобновление воспроизведения
 	func resumeSong(complition: @escaping (() -> Void)) {
 		isPlaying = true
+		UserDefaults.standard.set(true, forKey: "isPlaying")
 		if self.playerItem != nil {
 			self.player.play()
-			
 			complition()
 		} else {
 			self.nextTrack(complition: complition)
@@ -281,8 +347,8 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	//пауза
 	func pauseSong(complition: (() -> Void)) {
 		isPlaying = false
+		UserDefaults.standard.set(false, forKey: "isPlaying")
 		self.player.pause()
-		
 		complition()
 	}
 	
@@ -315,9 +381,9 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		nextTrack(complition: complition)
 	}
 	
+	
 	// проигрываем трек по URL
 	func playAudioWith(trackURL:URL) {
-		
 		if playerItem != nil {
 			self.removeObserver(self, forKeyPath: #keyPath(AudioPlayerManager.playerItem.status))
 		}
@@ -353,7 +419,7 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 			self.playingSong = SongObject()
 			self.playingSong.trackID = nil
 			self.player.pause()
-			isPlaying = false
+			self.isPlaying = false
 			self.playerItem = nil
 			configurePlayingSong(song: playingSong)
 		}
@@ -362,7 +428,7 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 //			return
 //		}
 		DispatchQueue.global(qos: .background).async {
-			Downloader.sharedInstance.load(isSelfFlag: false, complition: complition)
+			Downloader.sharedInstance.runLoad(isSelf: false, complition: complition)
 		}
 	}
 	
@@ -402,6 +468,12 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	}
 	*/
 	
+	func playAlertClockTrack(trackURL: URL, song: SongObject){
+		self.playingSong = song
+	    playAudioWith(trackURL: trackURL)
+		self.player.play()
+	}
+	
 	// проигрываем трек из кеша
 	func playFromCache(complition: (() -> Void)?) {
 		
@@ -430,6 +502,10 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		let str = FileManager.applicationSupportDir().addingPercentEncoding(withAllowedCharacters:.urlHostAllowed)
 		let docUrl = NSURL(string:str!)?.appendingPathComponent("Tracks")
 		let resUrl = docUrl?.absoluteURL.appendingPathComponent(playingSong.path!)
+		var playingTrackUrlString = resUrl?.absoluteURL.absoluteString.replacingOccurrences(of: "%2F", with: "/")
+		playingTrackUrlString = playingTrackUrlString?.replacingOccurrences(of: "%20", with: " ")
+		//сохранение пути и объекта трека в userDefaults для использования с будильником
+//		UserDefaults.standard.set(playingSong.path, forKey:"PlayingSongPath")
 		guard let url = resUrl else {
 			return
 		}
@@ -437,6 +513,13 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 		self.playAudioWith(trackURL: url as URL)
 		self.playingSongID = self.playingSong.trackID
 		self.configurePlayingSong(song: self.playingSong)
+		//Сохранение обЪекта трека
+		do{
+			try UserDefaults.standard.set(PropertyListEncoder().encode(self.playingSong), forKey: "playingSongObject")
+		}catch{
+			NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateSysInfo"), object: nil, userInfo: ["message":"Объект трека не сохранен в UD"])
+		}
+		
 		if complition != nil {
 			complition!()
 		}
@@ -453,9 +536,9 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	func addDateToHistoryTable(playingSong:SongObject) {
 		
 		let creatinDate = Date()
-		let dateFormetter = DateFormatter()
-		dateFormetter.dateFormat = "yyyy-MM-dd'T'H:m:s"
-		let creationDateString = dateFormetter.string(from: creatinDate)
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "yyyy-MM-dd'T'H:m:s"
+		let creationDateString = dateFormatter.string(from: creatinDate)
 		let historyEntity = HistoryEntity()
 		
 		historyEntity.recId = NSUUID().uuidString
@@ -468,6 +551,37 @@ class AudioPlayerManager: NSObject, AVAssetResourceLoaderDelegate, NSURLConnecti
 	
 	func fwdTrackToEnd(){
 		isSkipped = true
-		player.seek(to: (player.currentItem?.duration)!-CMTimeMake(3, 1))
+		if let item = player.currentItem{
+				player.seek(to: (item.duration) - CMTimeMake(3, 1))
+		}
+		
+	}
+	
+	
+	/// Воспроизводит трек по URL
+	///
+	/// - Parameters:
+	///   - url: путь к треку
+	///   - song: объект с инфой о треке
+	///   - seekTo: время с которого начать играть трек
+	func playOuterTrack(url: URL, song: SongObject, seekTo: Float64){
+		self.pauseSong{}
+		
+		playingSong = song
+		
+		playAudioWith(trackURL: url)
+		
+		playerItem.seek(to: CMTimeMakeWithSeconds(seekTo, 1000000000))
+		
+		do{
+			try UserDefaults.standard.set(PropertyListEncoder().encode(self.playingSong), forKey: "playingSongObject")
+		}catch{
+			NotificationCenter.default.post(name: NSNotification.Name(rawValue: "updateSysInfo"), object: nil, userInfo: ["message":"Объект трека не сохранен в UD"])
+		}
+		
+		self.playingSongID = song.trackID
+		
+		self.configurePlayingSong(song: song)
+		self.pauseSong {}
 	}
 }

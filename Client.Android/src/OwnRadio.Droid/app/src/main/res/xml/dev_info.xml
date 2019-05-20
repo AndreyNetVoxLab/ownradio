@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="dev_info_pref_screen">
+    <PreferenceCategory
+        android:title="">
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="">
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Информация для разработчиков"
+        android:key="debug_info_pref_category"
+        android:layout="@layout/pref_header_title">
+        <Preference
+            android:title="Свободно"
+            android:key="total_free_mamory_pref"/>
+        <Preference
+            android:title="Занято"
+            android:key="used_memory_pref"/>
+        <Preference
+            android:title="Прослушано"
+            android:key="listened_tracks_count_pref"/>
+        <Preference
+            android:title="Кешировано"
+            android:key="cached_tracks_count_pref"/>
+        <Preference
+            android:title="Доступно памяти"
+            android:key="available_memory_pref"/>
+        <Preference
+            android:title="Имя пользователя"
+            android:key="username_pref"/>
+        <Preference
+            android:title="id пользователя"
+            android:key="userid_pref"/>
+        <Preference
+            android:title="id устройства"
+            android:key="deviceid_pref"/>
+        <Preference
+            android:title="Авторизация Google"
+            android:key="google_auth"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

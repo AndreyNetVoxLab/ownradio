@@ -5,6 +5,7 @@
         public ResponseStatus Status { get; set; }
         public string Title { get; set; }
         public string Artist { get; set; }
+        public bool LimitExceeded { get; set; }
 
     }
 
@@ -14,6 +15,7 @@
         OK,
         NotFound,
         FileLarge,
-        FileSmall
+        FileSmall,
+        LimitExceeded
     }
 }

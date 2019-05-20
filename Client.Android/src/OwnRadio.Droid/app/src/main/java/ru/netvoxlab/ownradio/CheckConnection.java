@@ -4,16 +4,56 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import static ru.netvoxlab.ownradio.Constants.ALL_CONNECTION_TYPES;
-import static ru.netvoxlab.ownradio.Constants.INTERNET_CONNECTION_TYPE;
-import static ru.netvoxlab.ownradio.Constants.ONLY_WIFI;
+
 
 /**
  * Created by a.polunina on 31.10.2016.
  */
 
 public class CheckConnection {
-	
+
+	/**
+	 * Get the network info
+	 * @param context
+	 * @return
+	 */
+	public static NetworkInfo getNetworkInfo(Context context){
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		return cm.getActiveNetworkInfo();
+	}
+
+	/**
+	 * Check if there is any connectivity
+	 * @param context
+	 * @return
+	 */
+	public static boolean isConnected(Context context){
+		NetworkInfo info = CheckConnection.getNetworkInfo(context);
+		return (info != null && info.isConnected());
+	}
+
+
+	/**
+	 * Check if there is any connectivity to a Wifi network
+	 * @param context
+	 * @return
+	 */
+	public static boolean isConnectedWifi(Context context){
+		NetworkInfo info = CheckConnection.getNetworkInfo(context);
+		return (info != null && info.isConnected() && info.getType() == ConnectivityManager.TYPE_WIFI);
+	}
+
+	/**
+	 * Check if there is any connectivity to a mobile network
+	 * @param context
+	 * @return
+	 */
+	public static boolean isConnectedMobile(Context context){
+		NetworkInfo info = CheckConnection.getNetworkInfo(context);
+		return (info != null && info.isConnected() && info.getType() == ConnectivityManager.TYPE_MOBILE);
+	}
+
+
 	public boolean CheckInetConnection(Context mCcontext) {
 		ConnectivityManager connectivityManager = (ConnectivityManager) mCcontext.getSystemService(mCcontext.CONNECTIVITY_SERVICE);
 		NetworkInfo inetInfo = connectivityManager.getActiveNetworkInfo();
@@ -22,26 +62,8 @@ public class CheckConnection {
 			new Utilites().SendInformationTxt(mCcontext, "Internet is disconnected");
 			return false;
 		}
-		NetworkInfo wifiInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-		//Считывем используемый тип подключения из настроек
-		PrefManager prefManager = new PrefManager(mCcontext);
-		String connectionType = prefManager.getPrefItem(INTERNET_CONNECTION_TYPE, ALL_CONNECTION_TYPES);
-		switch (connectionType){
-			case ONLY_WIFI:
-				if (!wifiInfo.isConnected()) {
-					new Utilites().SendInformationTxt(mCcontext, "WiFi is disconnected");
-					return false;
-				}
-				else {
-					new Utilites().SendInformationTxt(mCcontext, "WiFi is connected");
-					return true;
-				}
-			case ALL_CONNECTION_TYPES:
-				new Utilites().SendInformationTxt(mCcontext, "Internet is connected");
-				return true;
-			default:
-				new Utilites().SendInformationTxt(mCcontext, "WiFi is disconnected");
-				return false;
-		}
+		return true;
 	}
+
+
 }

@@ -66,13 +66,54 @@ public class TrackDataAccess {
 		ContentValues result = new ContentValues();
 		trackDB.openDatabase();
 		db = trackDB.database();
-		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length FROM track WHERE isexist = ? ORDER BY datetimelastlisten", new String[]{String.valueOf(1)});
+		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length, methodnumber FROM track WHERE isexist = ? ORDER BY datetimelastlisten", new String[]{String.valueOf(1)});
 		if (userCursor.moveToFirst()) {
 			result.put("id", userCursor.getString(0));
 			result.put("trackurl", userCursor.getString(1));
 			result.put("title", userCursor.getString(2));
 			result.put("artist", userCursor.getString(3));
 			result.put("length", userCursor.getInt(4));
+			result.put("methodnumber", userCursor.getInt(5));
+		} else {
+			result = null;
+		}
+		//db.close();
+		userCursor.close();
+		trackDB.close();
+		return result;
+	}
+	public ContentValues GetMostNewNotListenTrack() {
+		ContentValues result = new ContentValues();
+		trackDB.openDatabase();
+		db = trackDB.database();
+		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length, methodnumber FROM track WHERE isexist = ? AND countplay = 0 ORDER BY datetimelastlisten DESC", new String[]{String.valueOf(1)});
+		if (userCursor.moveToFirst()) {
+
+			result.put("trackurl", userCursor.getString(1));result.put("id", userCursor.getString(0));
+			result.put("title", userCursor.getString(2));
+			result.put("artist", userCursor.getString(3));
+			result.put("length", userCursor.getInt(4));
+			result.put("methodnumber", userCursor.getInt(5));
+		} else {
+			result = null;
+		}
+		//db.close();
+		userCursor.close();
+		trackDB.close();
+		return result;
+	}
+	public ContentValues GetOldListenedTrack() {
+		ContentValues result = new ContentValues();
+		trackDB.openDatabase();
+		db = trackDB.database();
+		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length, methodnumber FROM track WHERE isexist = ? AND countplay > 0 ORDER BY datetimelastlisten", new String[]{String.valueOf(1)});
+		if (userCursor.moveToFirst()) {
+			result.put("id", userCursor.getString(0));
+			result.put("trackurl", userCursor.getString(1));
+			result.put("title", userCursor.getString(2));
+			result.put("artist", userCursor.getString(3));
+			result.put("length", userCursor.getInt(4));
+			result.put("methodnumber", userCursor.getInt(5));
 		} else {
 			result = null;
 		}
@@ -87,13 +128,14 @@ public class TrackDataAccess {
 		ContentValues result = new ContentValues();
 		trackDB.openDatabase();
 		db = trackDB.database();
-		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length FROM track WHERE isexist = ? ORDER BY datetimelastlisten DESC", new String[]{String.valueOf(1)});
+		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length, methodnumber FROM track WHERE isexist = ? ORDER BY datetimelastlisten DESC", new String[]{String.valueOf(1)});
 		if (userCursor.moveToFirst()) {
 			result.put("id", userCursor.getString(0));
 			result.put("trackurl", userCursor.getString(1));
 			result.put("title", userCursor.getString(2));
 			result.put("artist", userCursor.getString(3));
 			result.put("length", userCursor.getInt(4));
+			result.put("length", userCursor.getInt(5));
 		} else {
 			result = null;
 		}
@@ -300,13 +342,34 @@ public class TrackDataAccess {
 		ContentValues result = new ContentValues();
 		trackDB.openDatabase();
 		db = trackDB.database();
-		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length FROM track WHERE id = ? and isexist = ? ORDER BY datetimelastlisten", new String[]{String.valueOf(trackId), String.valueOf(1)});
+		Cursor userCursor = db.rawQuery("SELECT id, trackurl, title, artist, length, methodnumber FROM track WHERE id = ? and isexist = ? ORDER BY datetimelastlisten", new String[]{String.valueOf(trackId), String.valueOf(1)});
 		if (userCursor.moveToFirst()) {
 			result.put("id", userCursor.getString(0));
 			result.put("trackurl", userCursor.getString(1));
 			result.put("title", userCursor.getString(2));
 			result.put("artist", userCursor.getString(3));
 			result.put("length", userCursor.getInt(4));
+			result.put("methodnumber", userCursor.getInt(5));
+		} else {
+			result = null;
+		}
+		userCursor.close();
+		trackDB.close();
+		return result;
+	}
+
+	//Возвращает трек по id если он не удалён
+	public ContentValues GetTrackByIdWithoutExist(String trackId) {
+		ContentValues result = new ContentValues();
+		trackDB.openDatabase();
+		db = trackDB.database();
+		Cursor userCursor = db.rawQuery("SELECT" +
+				" id, title, artist, methodnumber FROM track WHERE id = ? ORDER BY datetimelastlisten LIMIT 1", new String[]{trackId});
+		if (userCursor.moveToFirst()) {
+			result.put("id", userCursor.getString(0));
+			result.put("title", userCursor.getString(1));
+			result.put("artist", userCursor.getString(2));
+			result.put("methodnumber", userCursor.getInt(3));
 		} else {
 			result = null;
 		}

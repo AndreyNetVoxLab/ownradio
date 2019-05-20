@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Build;
 
 import java.util.Set;
 
@@ -96,6 +97,11 @@ public class MusicBroadcastReceiver extends BroadcastReceiver {
 
 		Intent remoteIntent = new Intent(context, MediaPlayerService.class);
 		remoteIntent.setAction(action);
-		context.startService(remoteIntent);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			context.startForegroundService(remoteIntent);
+		}
+		else{
+			context.startService(remoteIntent);
+		}
 	}
 }

@@ -2,166 +2,68 @@
 //  TimerViewController.swift
 //  OwnRadio
 //
-//  Created by Alexandr Serov on 28.12.2018.
-//  Copyright © 2018 Netvox Lab. All rights reserved.
+//  Created by Alexandr Serov on 16.04.2019.
+//  Copyright © 2019 Netvox Lab. All rights reserved.
 //
 
 import UIKit
 import HGCircularSlider
-import Foundation
 
 class TimerViewController: UIViewController {
 
-	@IBOutlet weak var timePicker: UISlider!
-	@IBOutlet weak var timeinfoLabel: UILabel!
-	@IBOutlet weak var setTimerBtn: UIButton!
-	@IBOutlet weak var setInfoLable: UILabel!
+    
+    @IBOutlet weak var circularSliderView: UIView!
+    @IBOutlet weak var timerinfoLabel: UILabel!
+    @IBOutlet weak var setTimerBTN: UIButton!
+    @IBOutlet weak var setInfoLabel: UILabel!
+    
+    
+    let defaults = UserDefaults.standard
+	var currentSliderValue = 0
+	var slider: CircularSlider = CircularSlider()
+	var timer: DispatchSourceTimer?
 	
-	
-	let defaults = UserDefaults.standard
-
-	
+    var remoteAudioControls: RemoteAudioControls?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-		//устанавливаем значение слайдера
-		timeinfoLabel.text = sliderValueToTime()
-		//Проверяем установлен ли таймер, если установлен отображаем его статус и меняем иконку кнопки
-		setInfoLable.text = ""
-		if defaults.bool(forKey: "timerState"){
-			setTimerBtn.setImage(UIImage(named: "blueTimer"), for: .normal)
-			timePicker.value = Float(UserDefaults.standard.integer(forKey: "timerDurationSeconds")) / 60
-			timeinfoLabel.text = sliderValueToTime()
-			let time = getRemainingTime()
-			let splittedTime = time.split(separator: ":")
-			if splittedTime.count == 2{
-				setInfoLable.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " ч, " + splittedTime[1] + " мин"
-			}
-			else{
-				setInfoLable.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " мин"
-			}
-
-		}else{
-			setTimerBtn.setImage(UIImage(named: "grayTimer"), for: .normal)
-		}
-        // Do any additional setup after loading the view.
-    }
-	
-	//Экшен смены значения ползунка
-	@IBAction func sliderValueChanged(_ sender: Any) {
-		timeinfoLabel.text = sliderValueToTime()
-	}
-	
-	//Получение осташегося времени работы таймера в виде интервала
-	func getRemainingTimeInterval() ->Double{
-		let currentDate = Date()
-		let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
-		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
-		let remainingTimerDuration = Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970
-		return remainingTimerDuration
-	}
-	
-	//Перевод временного интервала в вид hh:mm
-	func secondsToString(seconds: TimeInterval) -> String{
-		let formatter = DateComponentsFormatter()
-		formatter.allowedUnits = [.hour, .minute]
-		formatter.unitsStyle = .positional
-		let formattedString = formatter.string(from: seconds)
-		return formattedString ?? "0"
-	}
-	
-	//Процесс проверки таймера
-	var backgroundWorker = DispatchWorkItem{
-		while UserDefaults.standard.bool(forKey: "timerState"){
-			let currentDate = Date()
-			let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
-			let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
-			let remainingTimerDuration = Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970
-			if remainingTimerDuration <= 0{
-				UserDefaults.standard.set(false, forKey: "timerState")
-				UserDefaults.standard.set(0, forKey: "timerDurationSeconds")
-				exit(0)
-			}
-			else{
-				sleep(1)
-			}
-		}
-	}
-	
-	//Экшен нажатия на кнопку установки будильника
-	@IBAction func btnSetTimerClick(_ sender: UIButton) {
+        timerinfoLabel.text = ""
+        setInfoLabel.text = ""
+        createCircularSlider()
 		
-		//Если таймер был остановлен пользователем, пересоздаем его
-		if backgroundWorker.isCancelled{
-			backgroundWorker = DispatchWorkItem{
-				while UserDefaults.standard.bool(forKey: "timerState"){
-					let currentDate = Date()
-					let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
-					let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
-					let remainingTimerDuration = Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970
-					if remainingTimerDuration <= 0{
-						UserDefaults.standard.set(false, forKey: "timerState")
-						UserDefaults.standard.set(0, forKey: "timerDurationSeconds")
-						exit(0)
-					}
-				}
+		if defaults.bool(forKey: "timerState") {
+			setTimerBTN.setImage(UIImage(named: "blueTimer"), for: .normal)
+			
+			let updateTimerDate = UserDefaults.standard.integer(forKey: "updateTimerDate")
+			let time: String //getRemainingTime()
+			if updateTimerDate > UserDefaults.standard.integer(forKey: "setTimerDate") {
+				time = getRemainingTime(interval: updateTimerDate)
+				slider.endPointValue = CGFloat(Float(getRemainingTimeInterval(interval: updateTimerDate)) / 60)
+			} else {
+				time = getRemainingTime()
+				slider.endPointValue = CGFloat(Float(getRemainingTimeInterval()) / 60)
 			}
-		}
-		
-		//Если таймер не установлен, устанавливаем его
-		if !defaults.bool(forKey: "timerState"){
-			setTimerBtn.setImage(UIImage(named: "blueTimer"), for: .normal)
-			let seconds = timePicker.value * 60
-			defaults.set(true, forKey: "timerState")
-			defaults.set(Int(Date().timeIntervalSince1970), forKey:  "setTimerDate")
-			defaults.set(seconds, forKey:  "timerDurationSeconds")
-			DispatchQueue.global(qos: .background).async(execute: backgroundWorker)
-			let time = secondsToString(seconds: TimeInterval(seconds))
 			let splittedTime = time.split(separator: ":")
-			if splittedTime.count == 2{
-				setInfoLable.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " ч, " + splittedTime[1] + " мин"
-			}
-			else{
-				setInfoLable.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " мин"
+			if splittedTime.count == 2 {
+				setInfoLabel.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " ч, " + splittedTime[1] + " мин"
+			} else {
+				setInfoLabel.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " мин"
 			}
 			
+		} else {
+			setTimerBTN.setImage(UIImage(named: "grayTimer"), for: .normal)
 		}
-		else{
-			setTimerBtn.setImage(UIImage(named: "grayTimer"), for: .normal)
-			defaults.set(false, forKey: "timerState")
-			//defaults.set(0, forKey:  "timerDurationSeconds")
-			DispatchQueue.global(qos: .background).async{
-				self.backgroundWorker.cancel()
-			}
-			setInfoLable.text = "Таймер остановлен"
-		}
-	}
-	
-	//Получение оставшегося времени работы таймера в виде hh:mm
-	func getRemainingTime() -> String{
-		let currentDate = Date()
-		let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
-		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
-		let remainingTimerDuration = Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970
-		let formattedString = secondsToString(seconds: remainingTimerDuration)
-		return formattedString ?? "0"
-	}
-	
+		sliderValueChanged(sender: slider)
+    }
+    
+    override func remoteControlReceived(with event: UIEvent?) {
+        guard let remoteControls = remoteAudioControls else{
+            return
+        }
+        
+        remoteControls.remoteControlReceived(with: event)
+    }
 
-	
-	//Перевод значения слайдера в формат hh:mm
-	func sliderValueToTime() -> String{
-		let formatter = DateComponentsFormatter()
-		formatter.allowedUnits = [.hour, .minute]
-		formatter.unitsStyle = .positional
-		let formattedString = formatter.string(from: TimeInterval(timePicker.value * 60))
-		
-		return formattedString ?? "0"
-	}
-
-	@IBAction func tapAction(_ sender: Any) {
-		UserDefaults.standard.set(Int(Date().timeIntervalSince1970), forKey:  "setTimerDate")
-	}
-	
     /*
     // MARK: - Navigation
 
@@ -172,5 +74,142 @@ class TimerViewController: UIViewController {
     }
     */
 
+    
+    /// Создание круглого слайдера
+    func createCircularSlider(){
+        circularSliderView.backgroundColor = .clear
+        
+        var frame = circularSliderView.frame
+        frame.origin.x = 0
+        frame.origin.y = 0
+        
+        let grayColor = UIColor(red: 0.83, green: 0.83, blue: 0.83, alpha: 1)
+        let blueColor = UIColor(red: 0.08, green: 0.60, blue: 0.92, alpha: 1)
+        
+        slider = CircularSlider(frame: frame)
+        slider.maximumValue = 240.0
+        slider.trackColor = grayColor
+        slider.trackFillColor = blueColor
+        slider.diskColor = .clear
+        slider.diskFillColor = .clear
+        slider.endThumbStrokeColor = .clear
+        slider.endThumbTintColor = blueColor
+        slider.endThumbStrokeHighlightedColor = blueColor
+        slider.thumbRadius = 7
+        slider.addTarget(self, action: #selector(sliderValueChanged), for: .valueChanged)
+        slider.backgroundColor = .clear
+        circularSliderView.addSubview(slider)
+        sliderValueChanged(sender: slider)
+    }
+    
+    @objc func sliderValueChanged(sender: CircularSlider){
+        timerinfoLabel.text = timeIntervalToStr(interval: TimeInterval(Int(slider.endPointValue) * 60))
+    }
+    
+    func timeIntervalToStr(interval: TimeInterval) -> String{
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute]
+        formatter.unitsStyle = .positional
+        let formattedString = formatter.string(from: interval)
+        return formattedString ?? "0"
+    }
+    
+    private func startTimer(timeInterval: TimeInterval){
+        let queue = DispatchQueue(label: "AlertCloctTimer", attributes: .concurrent)
+        timer?.cancel()
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        
+        timer?.scheduleOneshot(deadline: .now() + .seconds(Int(timeInterval)))
+        timer?.setEventHandler{
+            self.timerAction()
+        }
+        
+        timer?.resume()
+    }
+    
+    func timerAction(){
+        if defaults.bool(forKey: "timerState") && !((timer?.isCancelled)!){
+            var setTimerDate = defaults.integer(forKey: "setTimerDate")
+            let updateTimerDate = defaults.integer(forKey: "updateTimerDate")
+            
+            if updateTimerDate > setTimerDate{
+                setTimerDate = updateTimerDate
+            }
+            
+            let timeInterval = Double(Int(slider.endPointValue) * 60)
+            
+            if (Int(Date().timeIntervalSince1970 - timeInterval) >= setTimerDate){
+                defaults.set(false, forKey: "timerState")
+                defaults.set(0, forKey: "timerDurationSeconds")
+				exit(0)
+            }else{
+                let datesDifferent = Int(timeInterval - Date().timeIntervalSince1970) - updateTimerDate
+                startTimer(timeInterval: TimeInterval(datesDifferent))
+            }
+        }
+    }
+	
+	func getRemainingTimeInterval() -> Float {
+		let currentDate = Date()
+		let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
+		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
+		let remainingTimerDuration = Float(Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970)
+		return remainingTimerDuration
+	}
+	
+	func getRemainingTimeInterval(interval: Int) -> Float {
+		let currentDate = Date()
+		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
+		let remainingTimerDuration = Float(Double(interval + timerDuration) - currentDate.timeIntervalSince1970)
+		return remainingTimerDuration
+	}
+	
+	func getRemainingTime() -> String {
+		let currentDate = Date()
+		let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
+		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
+		let remainingTimerDuration = Double(setTimerDate + timerDuration) - currentDate.timeIntervalSince1970
+		let formattedString = timeIntervalToStr(interval: remainingTimerDuration)
+		return formattedString ?? "0"
+	}
+	
+	func getRemainingTime(interval: Int) -> String {
+		let currentDate = Int(Date().timeIntervalSince1970)
+		//let setTimerDate = UserDefaults.standard.integer(forKey: "setTimerDate")
+		let timerDuration = UserDefaults.standard.integer(forKey: "timerDurationSeconds")
+		let remainingTimerDuration = interval + timerDuration - currentDate
+		let formattedString = timeIntervalToStr(interval: TimeInterval(remainingTimerDuration))
+		return formattedString ?? "0"
+	}
+    
+    @IBAction func startTimerBtnAction(_ sender: Any) {
+        if !defaults.bool(forKey: "timerState"){
+            let seconds = Float(Int(slider.endPointValue) * 60)
+            
+            setTimerBTN.setImage(UIImage(named: "blueTimer"), for: .normal)
+            defaults.set(true, forKey: "timerState")
+            defaults.set(Int(Date().timeIntervalSince1970), forKey: "setTimerDate")
+            defaults.set(Int(Date().timeIntervalSince1970), forKey: "updateTimerDate")
+            defaults.set(seconds, forKey: "timerDurationSeconds")
+            
+            
+            startTimer(timeInterval: TimeInterval(seconds))
+            
+            let stringTime = timeIntervalToStr(interval: TimeInterval(seconds))
+            let splittedTime = stringTime.split(separator: ":")
+            
+            if splittedTime.count == 2{
+                setInfoLabel.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " ч, " + splittedTime[1] + " мин"
+            }else{
+                setInfoLabel.text = "Таймер установлен\nприложение закроется через " + splittedTime[0] + " мин"
+            }
+        }else{
+            setTimerBTN.setImage(UIImage(named: "grayTimer"), for: .normal)
+            defaults.set(false, forKey: "timerState")
+            self.timer?.cancel()
+            self.timer = nil
+            
+            setInfoLabel.text = "Таймер остановлен"
+        }
+    }
 }
-

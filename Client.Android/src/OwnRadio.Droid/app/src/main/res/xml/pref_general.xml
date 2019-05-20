@@ -1,7 +1,15 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-				  xmlns:example="http://schemas.android.com/apk/res/ru.netvoxlab.ownradio">
-	<Preference>
-	</Preference>
+	              xmlns:asp="http://schemas.android.com/apk/res-auto"
+	              xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+			android:title="">
+	</PreferenceCategory>
+
+	<PreferenceCategory
+		android:title="">
+	</PreferenceCategory>
+
 	<PreferenceCategory
 		android:title="@string/pref_header_internet_connection"
 		android:key="pref_key_storage_settings"
@@ -46,27 +54,28 @@
             android:summary="@string/from_free_memory"
 			android:persistent="true"/>
 
-		<Preference
-			android:title="@string/pref_free_memory_size"
-			android:key="free_memory_size"
-			android:defaultValue="1">
-		</Preference>
-		<Preference
-			android:title="@string/pref_all_tracks_size"
-			android:key="all_tracks_size"
-			android:defaultValue="0">
-			<intent android:action="android.intent.action.MANAGE_PACKAGE_STORAGE"/>
-		</Preference>
+		<!--<Preference-->
+			<!--android:title="@string/pref_free_memory_size"-->
+			<!--android:key="free_memory_size"-->
+			<!--android:defaultValue="1">-->
+		<!--</Preference>-->
+		<!--<Preference-->
+			<!--android:title="@string/pref_all_tracks_size"-->
+			<!--android:key="all_tracks_size"-->
+			<!--android:defaultValue="0"-->
+			<!--android:summary="@string/pref_total_space_tracks">-->
+			<!--<intent android:action="android.intent.action.MANAGE_PACKAGE_STORAGE"/>-->
+		<!--</Preference>-->
 		<Preference
 			android:title="@string/pref_clear_cache"
 			android:summary="@string/summary_clear_all_cache"
 			android:key="delete_all_tracks">
 		</Preference>
-		<Preference
-			android:title="@string/pref_listening_tracks_size_size"
-			android:key="listening_tracks_size"
-			android:defaultValue="0">
-		</Preference>
+		<!--<Preference-->
+			<!--android:title="@string/pref_listening_tracks_size_size"-->
+			<!--android:key="listening_tracks_size"-->
+			<!--android:defaultValue="0">-->
+		<!--</Preference>-->
 		<Preference
 			android:title="@string/summary_clear_listening_cache"
 			android:key="delete_listening_tracks">
@@ -96,27 +105,39 @@
 		<Preference android:title="@string/buy_sub"
 					android:key="buy_subscription">
 		</Preference>
+		<ru.netvoxlab.ownradio.SeekBarPreference
+			android:key="tracks_listen_ratio">
+		</ru.netvoxlab.ownradio.SeekBarPreference>
+		<Preference android:title="Авторизоваться через google"
+			android:summary="Авторизация через google поможет идентифицировать ваши устройства"
+			android:key="login_with_google"/>
+
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:title="@string/pref_header_system_info"
 		android:key="pref_key_storage_settings"
 		android:layout="@layout/pref_header_title">
+		<!--<Preference-->
+			<!--android:key="sys_info"-->
+			<!--android:layout="@layout/pref_multiline_title"/>-->
 		<Preference
-			android:key="sys_info"
-			android:layout="@layout/pref_multiline_title"/>
+			android:key="go_to_debug_info"
+			android:title="Отладочная информация"
+			android:summary="Отладочная информация для разработчиков"/>
+
 	</PreferenceCategory>
-	<PreferenceCategory
-		android:title="@string/pref_header_count_tracks"
-		android:key="pref_key_storage_settings"
-		android:layout="@layout/pref_header_title">
-		<Preference
-			android:key="pref_count_tracks_table"
-			android:layout="@layout/pref_multiline_title" />
-		<Preference
-			android:title="@string/pref_last_log_recs"
-			android:key="pref_last_log_recs" />
-		<Preference
-			android:title="@string/pref_send_log"
-			android:key="pref_send_logs" />
-	</PreferenceCategory>
+	<!--<PreferenceCategory-->
+		<!--android:title="@string/pref_header_count_tracks"-->
+		<!--android:key="pref_key_storage_settings"-->
+		<!--android:layout="@layout/pref_header_title">-->
+		<!--<Preference-->
+			<!--android:key="pref_count_tracks_table"-->
+			<!--android:layout="@layout/pref_multiline_title" />-->
+		<!--<Preference-->
+			<!--android:title="@string/pref_last_log_recs"-->
+			<!--android:key="pref_last_log_recs" />-->
+		<!--<Preference-->
+			<!--android:title="@string/pref_send_log"-->
+			<!--android:key="pref_send_logs" />-->
+	<!--</PreferenceCategory>-->
 </PreferenceScreen>

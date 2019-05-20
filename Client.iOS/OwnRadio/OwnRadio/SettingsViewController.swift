@@ -14,54 +14,45 @@ class SettingsViewController: UITableViewController {
 	@IBOutlet weak var maxMemoryLbl: UILabel!
 	@IBOutlet weak var stepper: UIStepper!
 	@IBOutlet weak var onlyWiFiSwitch: UISwitch!
-	@IBOutlet weak var freeSpaceLbl: UILabel!
-	@IBOutlet weak var cacheFolderSize: UILabel!
-	@IBOutlet weak var listenTracksSize: UILabel!
+	
 	@IBOutlet weak var delAllTracksLbl: UILabel!
-	@IBOutlet weak var versionLbl: UILabel!
-	@IBOutlet weak var deviceIdLbl: UILabel!
+    @IBOutlet weak var tracksRatio: UISlider!
+    @IBOutlet weak var ratioLabel: UILabel!
     
 	@IBOutlet weak var fromFreeSpace: UILabel!
 
 	@IBOutlet weak var delAllTracksCell: UITableViewCell!
-	@IBOutlet weak var countPlayingTracksTable: UILabel!
-
+	
+	var player: AudioPlayerManager?
+	var remoteAudioControls: RemoteAudioControls?
 	//получаем таблицу с количеством треков сгруппированных по количестсву их прослушиваний
 	var playedTracks: NSArray = CoreDataManager.instance.getGroupedTracks()
 	
+	let userDefaults = UserDefaults.standard
+	let tracksUrlString = FileManager.applicationSupportDir().appending("/Tracks/")
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		let userDefaults = UserDefaults.standard
-		let tracksUrlString = FileManager.applicationSupportDir().appending("/Tracks/")
+		
 
-		onlyWiFiSwitch.isOn = (userDefaults.object(forKey: "isOnlyWiFi") as? Bool)!
+		onlyWiFiSwitch.isOn = (userDefaults.object(forKey: "trafficOptimize") as? Bool)!
 		
 		stepper.wraps = true
 		stepper.autorepeat = true
 		stepper.value = (userDefaults.object(forKey: "maxMemorySize") as? Double)!
-		
+		maxMemoryLbl.text = Int(stepper.value).description + "%"
 		stepper.minimumValue = 10.0
 		stepper.maximumValue = 50.0
 		stepper.stepValue = 10.0
-		maxMemoryLbl.text = (userDefaults.object(forKey: "maxMemorySize") as? Int)!.description  + "%"
-        fromFreeSpace.text = "*от свободной памяти " + DiskStatus.GBFormatter(Int64(DiskStatus.freeDiskSpaceInBytes) + Int64(DiskStatus.folderSize(folderPath: tracksUrlString))) + " Gb"
-		freeSpaceLbl.text = "Свободно " + DiskStatus.GBFormatter(Int64(DiskStatus.freeDiskSpaceInBytes)) + " Gb"
+
+		let freeSpace = Int64(DiskStatus.folderSize(folderPath: self.tracksUrlString)) + Int64(DiskStatus.freeDiskSpaceInBytes)
+
+		self.fromFreeSpace.text = "*от свободной памяти " + DiskStatus.GBFormatter(freeSpace) + " Gb"
 		
-		cacheFolderSize.text = "Занято всего " + DiskStatus.GBFormatter(Int64(DiskStatus.folderSize(folderPath: tracksUrlString))) + " Gb (" + CoreDataManager.instance.chekCountOfEntitiesFor(entityName: "TrackEntity").description + " треков)"
-		
-		let listenTracks = CoreDataManager.instance.getListenTracks()
-		listenTracksSize.text = "Из них уже прослушанных " + DiskStatus.GBFormatter(Int64(DiskStatus.listenTracksSize(folderPath:tracksUrlString, tracks: listenTracks))) + " Gb (" + listenTracks.count.description + " треков)"
 		
 		let tapDelAllTracks = UITapGestureRecognizer(target: self, action: #selector(self.tapDelAllTracks(sender:)))
-		delAllTracksCell.isUserInteractionEnabled =  true
+		delAllTracksCell.isUserInteractionEnabled = true
 		delAllTracksCell.addGestureRecognizer(tapDelAllTracks)
-		
-		if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-			if (Bundle.main.infoDictionary?["CFBundleVersion"] as? String) != nil {
-				versionLbl.text =  "Version: v" + version
-			}
-		}
-		deviceIdLbl.text = "DeviceID: " + (UIDevice.current.identifierForVendor?.uuidString.lowercased())!
 		
 		
 		var str = "" as NSString
@@ -77,15 +68,26 @@ class SettingsViewController: UITableViewController {
 			}
 			}
 		}
+	
 		
-		countPlayingTracksTable.numberOfLines = playedTracks.count
-		countPlayingTracksTable.text = str as String
+		//Инициализация регулятора выдачи треков
+		let thumbImage = UIImage(named: "trackThumb")
+		let size = CGSize(width: (thumbImage?.size.width)! * 1.5, height: (thumbImage?.size.height)! * 1.5)
+		UIGraphicsBeginImageContextWithOptions(size, false, 2.0)
+		thumbImage?.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+		let newThumbImage = UIGraphicsGetImageFromCurrentImageContext()
+		UIGraphicsEndImageContext()
+		tracksRatio.setThumbImage(newThumbImage, for: .normal)
+		let ratio = UserDefaults.standard.integer(forKey: "getTracksRatio")
+        ratioLabel.text = "\(ratio)%"
+		tracksRatio.setValue(Float(ratio), animated: false)
 	}
 	
 	@IBAction func onlyWiFiSwitchValueChanged(_ sender: UISwitch) {
-		UserDefaults.standard.set(onlyWiFiSwitch.isOn, forKey: "isOnlyWiFi")
+		UserDefaults.standard.set(onlyWiFiSwitch.isOn, forKey: "trafficOptimize")
 		UserDefaults.standard.synchronize()
 	}
+	
 	
 	//Сохраняем настроки "занимать не более" и выводим актуальное значение при его изменении
 	@IBAction func stepperValueChanged(_ sender: UIStepper) {
@@ -104,23 +106,49 @@ class SettingsViewController: UITableViewController {
 			Downloader.sharedInstance.fillCache()
 		}
 	}
+    
+	override func remoteControlReceived(with event: UIEvent?) {
+		guard let remoteControls = remoteAudioControls else {
+			print("Remote controls not set")
+			return
+		}
+		remoteControls.remoteControlReceived(with: event)
+	}
 	
-	func tapDelAllTracks(sender: UITapGestureRecognizer) {
+	override func viewDidAppear(_ animated: Bool) {
+		self.navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+	}
+	
+	override func viewDidDisappear(_ animated: Bool) {
+		self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+	}
+	
+	@objc func tapDelAllTracks(sender: UITapGestureRecognizer) {
 		let dellAllTracksAlert = UIAlertController(title: "Удаление всех треков", message: "Вы уверены что хотите удалить все треки из кэша? Приложение не сможет проигрывать треки в офлайне пока не будет наполнен кэш.", preferredStyle: UIAlertControllerStyle.alert)
 		
 		dellAllTracksAlert.addAction(UIAlertAction(title: "ОК", style: .default, handler: { (action: UIAlertAction!) in
+			self.player?.pauseSong {
+				if let rootController = UIApplication.shared.keyWindow?.rootViewController {
+					let navigationController = rootController as! UINavigationController
+					
+					if let radioViewContr = navigationController.topViewController  as? RadioViewController {
+						radioViewContr.updateUI()
+					}
+				}
+			}
+			
 			let tracksUrlString = FileManager.applicationSupportDir().appending("/Tracks/")
 			// получаем содержимое папки Tracks
 			if let tracksContents = try? FileManager.default.contentsOfDirectory(atPath: tracksUrlString ){
 				
 				for track in tracksContents {
 					// проверка для удаления только треков
-					if track.contains("mp3") {
+						if track.contains("mp3") {
 						let path = tracksUrlString.appending(track)
 						do{
 							print(path)
 							try FileManager.default.removeItem(atPath: path)
-							
+								
 						} catch  {
 							print("Ошибка при удалении файла  - \(error)")
 						}
@@ -155,20 +183,25 @@ class SettingsViewController: UITableViewController {
 			let listenTracks = CoreDataManager.instance.getListenTracks()
 			print("\(listenTracks.count)")
 			for _track in listenTracks {
-				let path = tracksUrlString.appending((_track.path!))
-				
-				if FileManager.default.fileExists(atPath: path) {
-					do{
-						// удаляем файл
-						try FileManager.default.removeItem(atPath: path)
+				let songObjectEncoded = UserDefaults.standard.data(forKey: "playingSongObject")
+				let currentSongObject = try! PropertyListDecoder().decode(SongObject.self, from: songObjectEncoded!)
+				if _track.trackID.isEqual(currentSongObject.trackID) == false{
+					let path = tracksUrlString.appending((_track.path!))
+					
+					if FileManager.default.fileExists(atPath: path) {
+						do{
+							// удаляем файл
+							try FileManager.default.removeItem(atPath: path)
+						}
+						catch {
+							print("Ошибка при удалении файла - \(error)")
+						}
 					}
-					catch {
-						print("Ошибка при удалении файла - \(error)")
-					}
+					// удаляем трек с базы
+					CoreDataManager.instance.deleteTrackFor(trackID: _track.trackID)
+					CoreDataManager.instance.saveContext()
 				}
-				// удаляем трек с базы
-				CoreDataManager.instance.deleteTrackFor(trackID: _track.trackID)
-				CoreDataManager.instance.saveContext()
+				
 			}
 			
 			self.viewDidLoad()
@@ -191,7 +224,13 @@ class SettingsViewController: UITableViewController {
 	@IBAction func rateAppBtn(_ sender: UIButton) {
 		UIApplication.shared.openURL(NSURL(string: "itms://itunes.apple.com/ru/app/ownradio/id1179868370")! as URL)
 	}
-	
+    @IBAction func ratioChangeAction(_ sender: UISlider) {
+		sender.setValue(sender.value.rounded(.down), animated: true)
+		UserDefaults.standard.set(Int(tracksRatio.value.rounded(.down)), forKey: "getTracksRatio")
+        ratioLabel.text = "\(Int(tracksRatio.value.rounded(.down)))%"
+    }
+    
+    
 //	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 ////		if indexPath.section == 4 && indexPath.row == 0 {
 ////

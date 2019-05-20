@@ -32,66 +32,66 @@ public class APICalls {
 
 		try {
 			Map<String, String> result = new GetNextTrack(mContext).execute(deviceId).get();
-			if(result == null)
+			if (result == null)
 				return null;
 			UUID.fromString(result.get("id")).toString();
 			return result;
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			new Utilites().SendInformationTxt(mContext, "Error by GetNextTrackID " + ex.getLocalizedMessage());
 			return null;
 		}
 	}
 
 	//Пытается отправить count записей истории прослушивания треков
-	public void SendHistory(String deviceId){
+	public void SendHistory(String deviceId) {
 		CheckConnection checkConnection = new CheckConnection();
 		if (!checkConnection.CheckInetConnection(mContext)) {
 			return;
 		}
-		
+
 		try {
 			Boolean result = new HistorySend(mContext).execute(deviceId).get();
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			new Utilites().SendInformationTxt(mContext, "Error by sendHistory " + ex.getLocalizedMessage());
 		}
 
 	}
-	
-	public void SendLogs(String deviceId, String path){
+
+	public void SendLogs(String deviceId, String path) {
 		CheckConnection checkConnection = new CheckConnection();
 		if (!checkConnection.CheckInetConnection(mContext)) {
 			return;
 		}
-		
+
 		try {
 			Boolean result = new SendLogFile(mContext).execute(deviceId, path).get();
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			new Utilites().SendInformationTxt(mContext, "Error by sendLogs " + ex.getLocalizedMessage());
 		}
 	}
-	
-	public void RegisterDevice(String deviceId, String deviceName){
+
+	public void RegisterDevice(String deviceId, String deviceName) {
 		CheckConnection checkConnection = new CheckConnection();
 		if (!checkConnection.CheckInetConnection(mContext)) {
 			return;
 		}
-		
+
 		try {
 			Boolean result = new RegisterDevice(mContext).execute(deviceId, deviceName).get();
-		}catch (Exception ex) {
+		} catch (Exception ex) {
 			new Utilites().SendInformationTxt(mContext, "Error by registerDevice " + ex.getLocalizedMessage());
 		}
 
 	}
-	
-	public void SetIsCorrect(String deviceId, String trackId, Integer isCorrect){
+
+	public void SetIsCorrect(String deviceId, String trackId, Integer isCorrect) {
 		CheckConnection checkConnection = new CheckConnection();
-		if (!checkConnection.CheckInetConnection(mContext)){
+		if (!checkConnection.CheckInetConnection(mContext)) {
 			return;
 		}
-		try{
+		try {
 			Boolean result = new SetIsCorrect(mContext).execute(deviceId, trackId, isCorrect.toString()).get();
-		}catch (Exception ex){
+		} catch (Exception ex) {
 			new Utilites().SendInformationTxt(mContext, "Error by setIsCorrect " + ex.getLocalizedMessage());
 		}
 	}

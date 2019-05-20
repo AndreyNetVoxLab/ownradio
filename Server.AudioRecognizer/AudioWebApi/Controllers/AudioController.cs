@@ -20,15 +20,19 @@ namespace AudioWebApi.Controllers
 		[HttpPost]
 		public IActionResult Post(IFormFile file)
 		{
-            if (file == null && HttpContext.Request.Form.Files.Count > 0)
-            {
-                file = HttpContext.Request.Form.Files[0];
-            }
 
             if (file == null)
 			{
-				Log.Error("File is missing");
-				return StatusCode(StatusCodes.Status400BadRequest, "Load file, please...");
+                if(HttpContext.Request.Form.Files.Count > 0)
+                {
+                    file = HttpContext.Request.Form.Files[0];
+                }
+                else
+                {
+                    Log.Error("File is missing");
+                    return StatusCode(StatusCodes.Status400BadRequest, "Load file, please...");
+                }
+				
 			}
 
 			InfoResponse response = new InfoResponse();
@@ -48,6 +52,7 @@ namespace AudioWebApi.Controllers
 
 				music.Title = response.Title;
 				music.Artist = response.Artist;
+                music.LimitExceeded = response.LimitExceeded;
 				Log.Information("Write info on music");
 			}
 
@@ -61,6 +66,8 @@ namespace AudioWebApi.Controllers
 					return StatusCode(StatusCodes.Status413RequestEntityTooLarge, music);
 				case ResponseStatus.FileSmall:
 					return StatusCode(StatusCodes.Status411LengthRequired, music);
+                case ResponseStatus.LimitExceeded:
+                    return StatusCode(StatusCodes.Status429TooManyRequests, music);
 			}
 
 			return StatusCode(StatusCodes.Status200OK, music);

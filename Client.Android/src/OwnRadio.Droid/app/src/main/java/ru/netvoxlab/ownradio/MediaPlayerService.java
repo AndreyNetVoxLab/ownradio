@@ -44,16 +44,23 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 
+import ru.netvoxlab.ownradio.rdevapi.RdevApiCalls;
+import ru.netvoxlab.ownradio.rdevapi.RdevGetTrack;
 import ru.netvoxlab.ownradio.utils.ResourceHelper;
 
 import static android.app.PendingIntent.getActivity;
 import static ru.netvoxlab.ownradio.Constants.CURRENT_TRACK_ARTIST;
 import static ru.netvoxlab.ownradio.Constants.CURRENT_TRACK_TITLE;
+import static ru.netvoxlab.ownradio.Constants.OPTIMIZE_DISABLED;
+import static ru.netvoxlab.ownradio.Constants.OPTIMIZE_ENABLED;
+import static ru.netvoxlab.ownradio.Constants.OPTIMIZE_STATUS;
 import static ru.netvoxlab.ownradio.MainActivity.ActionButtonImgUpdate;
 import static ru.netvoxlab.ownradio.MainActivity.ActionNotFoundTrack;
 import static ru.netvoxlab.ownradio.MainActivity.ActionProgressBarFirstTracksLoad;
 import static ru.netvoxlab.ownradio.MainActivity.ActionProgressBarUpdate;
 import static ru.netvoxlab.ownradio.MainActivity.ActionTrackInfoUpdate;
+import static ru.netvoxlab.ownradio.MainActivity.ActionTrackInfoUpdate;
+import static ru.netvoxlab.ownradio.MainActivity.ActionCheckListensCount;
 import static ru.netvoxlab.ownradio.RequestAPIService.ACTION_GETNEXTTRACK;
 import static ru.netvoxlab.ownradio.RequestAPIService.ACTION_SENDHISTORY;
 import static ru.netvoxlab.ownradio.RequestAPIService.EXTRA_COUNT;
@@ -98,7 +105,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 	String TrackID = "";
 	Boolean FlagDownloadTrack = true;
 	final String TAG = "ownRadio";
-	
+
+	SharedPreferences sp;
 	ContentValues track;
 	int startPosition = 0;
 	String startTrackID = "";
@@ -119,6 +127,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		this.sp = PreferenceManager.getDefaultSharedPreferences(this);
+		startForeground(3, new Notification());
 		prefManager = new PrefManager(this);
 		trackDataAccess = new TrackDataAccess(getApplicationContext());
 		utilites = new Utilites();
@@ -307,7 +317,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 							player.release();
 							player = null;
 						}
-						new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 0);
+						//new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 0);
+						new RdevApiCalls(getApplicationContext()).SetIsCorrect(track.getAsString("id"), false);
 						new TrackToCache(getApplicationContext()).DeleteTrackFromCache(track);
 						utilites.SendInformationTxt(getApplicationContext(), "Битый трек удален и помечен");
 						PlayNext();
@@ -327,9 +338,10 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		player.setOnPreparedListener(this);
 		
 		//Блокирует отключение 3G когда экран не активен
-		wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "OwnRadioPlayback");
+		wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "NVXOwnRadio:NVXOwnRadioPlayback");
 		if (!wl.isHeld())
 			wl.acquire();
+
 	}
 	
 	public void onCompletion(MediaPlayer mediaPlayer) {
@@ -356,11 +368,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		}
 		if (!trackDataAccess.CheckEnoughTimeFromStartPlaying(track.getAsString("id"))) {
 			new TrackToCache(getApplicationContext()).DeleteTrackFromCache(track);
-			if (GetDuration() < minTrackDuration)
-				new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 0);
-			else
-				new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 2);
-			
+			if (GetDuration() < minTrackDuration) {
+//				new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 0);
+			}
+			else {
+//				new APICalls(getApplicationContext()).SetIsCorrect(DeviceID, track.getAsString("id"), 2);
+			}
 			try {
 				utilites.SendInformationTxt(getApplicationContext(), "track id: " + track.get("id") + ", \n track duration (server): " + track.get("length") + ", \n track duration (player): " + GetDuration());
 			} catch (Exception ex) {
@@ -378,7 +391,19 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 			Intent historySenderIntent = new Intent(this, RequestAPIService.class);
 			historySenderIntent.setAction(ACTION_SENDHISTORY);
 			historySenderIntent.putExtra(EXTRA_DEVICEID, DeviceID);
-			startService(historySenderIntent);
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				startForegroundService(historySenderIntent);
+			}else{
+				startService(historySenderIntent);
+			}
+
+
+			SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			int currentListens = sp.getInt("rateListensCount", 0);
+			sp.edit().putInt("rateListensCount", currentListens + 1).apply();
+			Intent mainIntent = new Intent(ActionCheckListensCount);
+			getApplicationContext().sendBroadcast(mainIntent);
 		}
 	}
 	
@@ -391,9 +416,21 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 	}
 	
 	public void Play() {
+
+		AudioManager mAudioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+
+		if (mAudioManager.isMusicActive()) {
+			int focusResult = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+			Intent i = new Intent("com.android.music.musicservicecommand");
+
+			i.putExtra("command", "pause");
+			getApplicationContext().sendBroadcast(i);
+		}
+
 		Log.d(TAG, "Play(): ");
 		playbackWithHSisInterrupted = false;
-		
+
+
 		
 		//todo:add code
 		
@@ -405,26 +442,31 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 			}
 			
 			player.start();
+
 			utilites.SendInformationTxt(getApplicationContext(), "Play(): start");
 
 //			UpdatePlaybackState(PlaybackStateCompat.STATE_PLAYING);
 //			StartNotification();
 //			UpdateButtonPlayPauseImg();
 			UpdateMediaMetadataCompat();
+			sp.edit().putString("current_playing_track_id", TrackID).commit();
 		}
 		
 		if (player == null) {
 			InitializePlayer();
 			player.setVolume(0.1f, 0.1f);
+			sp.edit().putString("current_playing_track_id", TrackID).commit();
 		}
 		if (mediaSessionCompat == null)
 			InitMediaSession();
+			sp.edit().putString("current_playing_track_id", TrackID).commit();
 		
 		if (player.isPlaying()) {
 			UpdatePlaybackState(PlaybackStateCompat.STATE_PLAYING);
+			sp.edit().putString("current_playing_track_id", TrackID).commit();
 			return;
 		}
-		
+
 		
 		try {
 
@@ -433,12 +475,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 //			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 //			startPosition = settings.getInt("LastPosition", 0);
 //			startTrackID = settings.getString("LastTrackID", "");
-			
 			if (getTrackForPlayFromDB()) {
 //				player.setDataSource(getApplicationContext(), Uri.parse(trackURL));
 				player.setDataSource(trackURL);
-				Intent i = new Intent(ActionTrackInfoUpdate);
-				getApplicationContext().sendBroadcast(i);
+				Intent updateInfoIntent = new Intent(ActionTrackInfoUpdate);
+				Intent updateProgressIntent = new Intent(ActionProgressBarUpdate);
+
+
+				getApplicationContext().sendBroadcast(updateInfoIntent);
+				getApplicationContext().sendBroadcast(updateProgressIntent);
+				sp.edit().putString("current_playing_track_id", TrackID).commit();
 			} else {
 				AssetFileDescriptor afd = getApplicationContext().getResources().openRawResourceFd(R.raw.zero_track);
 				player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getDeclaredLength());
@@ -479,7 +525,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 			
 			utilites.SendInformationTxt(getApplicationContext(), "SetTimeAndCountStartPlayback for track " + track.getAsString("id"));
 			
-			wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "OwnRadioPlayback");
+			wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "NVXOwnRadio:NVXOwnRadioPlayback");
 			if (!wl.isHeld())
 				wl.acquire();
 
@@ -519,10 +565,20 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		}
 		
 		Intent downloaderIntent = new Intent(this, LongRequestAPIService.class);
+
 		downloaderIntent.setAction(ACTION_GETNEXTTRACK);
 		downloaderIntent.putExtra(EXTRA_DEVICEID, DeviceID);
 		downloaderIntent.putExtra(EXTRA_COUNT, 10);//Увеличила количество треков для загрузки с 3 до 10 - задача 12850
-		startService(downloaderIntent);
+		try{
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				this.startForegroundService(downloaderIntent);
+			}else{
+				this.startService(downloaderIntent);
+			}
+		}catch (Exception ex){
+			Log.d("DownloaderException", ex.getLocalizedMessage());
+		}
+
 	}
 	
 	
@@ -538,6 +594,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		
 		if (player.isPlaying()) {
 			player.pause();
+			sp.edit().putString("current_playing_track_id", "").commit();
+
 		}
 		UpdatePlaybackState(PlaybackStateCompat.STATE_PAUSED);
 	}
@@ -551,6 +609,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		SaveLastPosition();
 		
 		if (player.isPlaying()) {
+			sp.edit().putString("current_playing_track_id", "").commit();
 			player.stop();
 			
 		}
@@ -635,7 +694,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		Intent historySenderIntent = new Intent(this, RequestAPIService.class);
 		historySenderIntent.setAction(ACTION_SENDHISTORY);
 		historySenderIntent.putExtra(EXTRA_DEVICEID, DeviceID);
-		startService(historySenderIntent);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			startForegroundService(historySenderIntent);
+		}else{
+			startService(historySenderIntent);
+		}
 	}
 	
 	private void SaveHistory(int listedTillTheEnd, ContentValues trackInstance) {
@@ -669,10 +732,22 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 	
 	
 	public boolean DownloadFile(String id) {
-		boolean isDownload = false;
+		Boolean isDownload = false;
+		TrackDataAccess trackInfo = new TrackDataAccess(getApplicationContext());
 		try {
 			Map<String, String> obj = createMap(id);
-			isDownload = new DownloadTracks(getApplicationContext()).execute(obj).get();
+			String optimizeStatus = prefManager.getPrefItem(OPTIMIZE_STATUS, OPTIMIZE_ENABLED);
+			int cachedTrackCount = trackInfo.GetExistTracksCount();
+			if(optimizeStatus.equals(OPTIMIZE_ENABLED) && cachedTrackCount > 50){
+				return isDownload;
+			}else{
+				isDownload = new RdevGetTrack(getApplicationContext()).execute(obj).get();
+				if(isDownload == null){
+					RdevApiCalls rdevApiCalls = new RdevApiCalls(getApplicationContext());
+					rdevApiCalls.GetAuthToken();
+					DownloadFile(id);
+				}
+			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
@@ -761,8 +836,11 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		if (track != null)
 			return true;
 		do {
-			track = trackDataAccess.GetMostOldTrack();
-//			Intent i = new Intent(ActionTrackInfoUpdate);
+			track = trackDataAccess.GetMostNewNotListenTrack();
+			if (track == null){
+				track = trackDataAccess.GetOldListenedTrack();
+//			Intent i = new Intent(ActionTrackInfoUpdate)
+			};
 //			getApplicationContext().sendBroadcast(i);
 			if (track != null) {
 				startPosition = 0;
@@ -993,7 +1071,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 			
 			// create android channel
 			NotificationChannel androidChannel = new NotificationChannel("ownradio_channel",
-					"Воспроизведение", NotificationManager.IMPORTANCE_DEFAULT);
+					"Воспроизведение", NotificationManager.IMPORTANCE_LOW);
 			// Sets whether notifications posted to this channel should display notification lights
 			androidChannel.enableLights(false);
 			// Sets whether notification posted to this channel should vibrate.
@@ -1002,7 +1080,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 			androidChannel.setLightColor(Color.GREEN);
 			// Sets whether notifications posted to this channel appear on the lockscreen or not
 			androidChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-			
+
+			androidChannel.setSound(null, null);
+
+			androidChannel.setVibrationPattern(new long[]{ 0 });
+
+
 			NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			notificationManager.createNotificationChannel(androidChannel);
 			
@@ -1071,7 +1154,9 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 				.setContentIntent(pendingIntent)
 				.setContentTitle(trackTitle)
 				.setContentText(trackArtist)
-				.setLargeIcon(art);
+				.setLargeIcon(art)
+				.setVibrate(new long[]{ 0 })
+				.setSound(null);
 
 
 //		if (GetMediaPlayerState() == PlaybackStateCompat.STATE_PLAYING
@@ -1144,6 +1229,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		}
 		track = null;
 		UpdatePlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT);
+
 		Play();
 	}
 	
@@ -1308,7 +1394,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 		String tid = prefManager.getPrefItem("LastTrackID", "");
 		utilites.SendInformationTxt(getApplicationContext(), "PreloadTrack: Получен сохраненный id трека: " + tid);
 		if (tid != "") {
-			int currentPosition = prefManager.getPrefItemInt("LastPosition", -1) - 5000;
+			int currentPosition = prefManager.getPrefItemInt("LastPosition", -1);
 			if (currentPosition < 0)
 				currentPosition = 0;
 			utilites.SendInformationTxt(getApplicationContext(), "PreloadTrack: Получена сохраненная позиция проигрывания: " + currentPosition);

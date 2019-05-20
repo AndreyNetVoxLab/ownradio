@@ -13,19 +13,30 @@ class DiskStatus {
 	
 	//MARK: Formatter MB only
 	class func MBFormatter(_ bytes: Int64) -> String {
+//		let startTime = CFAbsoluteTimeGetCurrent()
+		
 		let formatter = ByteCountFormatter()
 		formatter.allowedUnits = ByteCountFormatter.Units.useMB
 		formatter.countStyle = ByteCountFormatter.CountStyle.decimal
 		formatter.includesUnit = false
+		
+//		let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//		print("time execute for MBformatter: \(String.localizedStringWithFormat("%.2f", endTime))")
+		
 		return formatter.string(fromByteCount: bytes) as String
 	}
     
     //MARK: Formatter GB only
     class func GBFormatter(_ bytes: Int64) -> String {
+//		let startTime = CFAbsoluteTimeGetCurrent()
+		
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = ByteCountFormatter.Units.useGB
         formatter.countStyle = ByteCountFormatter.CountStyle.decimal
         formatter.includesUnit = false
+		
+//		let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//		print("time execute for GBFormatter: \(String.localizedStringWithFormat("%.2f", endTime))")
         return formatter.string(fromByteCount: bytes) as String
     }
 	
@@ -53,8 +64,13 @@ class DiskStatus {
 	class var totalDiskSpaceInBytes:UInt64 {
 		get {
 			do {
+//				let startTime = CFAbsoluteTimeGetCurrent()
+				
 				let systemAttributes = try FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String)
 				let space = (systemAttributes[FileAttributeKey.systemSize] as? NSNumber)?.uint64Value
+				
+//				let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//				print("time execute for totalDiskSpaceInBytes: \(String.localizedStringWithFormat("%.2f", endTime))")
 				return space!
 			} catch {
 				return 0
@@ -64,7 +80,9 @@ class DiskStatus {
 	
 	//возвращает количество памяти, занимаемое треками
 	class func folderSize(folderPath:String) -> UInt64{
-
+		
+//		let startTime = CFAbsoluteTimeGetCurrent()
+		
 		let filesArray:[String]? = try? FileManager.default.subpathsOfDirectory(atPath: folderPath.appending("/")) as [String]
 		var fileSize:UInt64 = 0
 		
@@ -81,22 +99,32 @@ class DiskStatus {
 			}
 		}
 		
+//		let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//		print("time execute for folderSize: \(String.localizedStringWithFormat("%.2f", endTime))")
+		
 		return fileSize
 	}
 	
 	//возвращает количество свободной памяти
 	class var freeDiskSpaceInBytes:UInt64 {
 		get{
-		let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last!
-		guard
-			let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: documentDirectory),
-			let freeSize = systemAttributes[.systemFreeSize] as? NSNumber
-			else {
-				// something failed
-				return 0
-		}
-		let corectSize = freeSize.doubleValue;
-		return UInt64(corectSize)
+			
+//			let startTime = CFAbsoluteTimeGetCurrent()
+			
+			let documentDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last!
+			guard
+				let systemAttributes = try? FileManager.default.attributesOfFileSystem(forPath: documentDirectory),
+				let freeSize = systemAttributes[.systemFreeSize] as? NSNumber
+				else {
+					// something failed
+					return 0
+			}
+			let corectSize = freeSize.doubleValue;
+			
+//			let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//			print("time execute for freeDiskSpaceInBytes: \(String.localizedStringWithFormat("%.2f", endTime))")
+			
+			return UInt64(corectSize)
 		}
 	}
 	
@@ -104,13 +132,21 @@ class DiskStatus {
 	//возвращает общее количество занятой памяти
 	class var usedDiskSpaceInBytes:UInt64 {
 		get {
+//			let startTime = CFAbsoluteTimeGetCurrent()
+			
 			let usedSpace = totalDiskSpaceInBytes - freeDiskSpaceInBytes
+			
+//			let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//			print("time execute for usedDiskSpaceInBytes: \(String.localizedStringWithFormat("%.2f", endTime))")
+			
 			return usedSpace
 		}
 	}
     
     //возвращает количество памяти, занимаемое треками
     class func listenTracksSize(folderPath:String, tracks:[SongObject]) -> UInt64{
+		let startTime = CFAbsoluteTimeGetCurrent()
+		
         let tracksUrlString =  FileManager.applicationSupportDir().appending("/Tracks/")
         var fileSize:UInt64 = 0
         
@@ -128,7 +164,10 @@ class DiskStatus {
                 print("Ошибка: файл не существует")
             }
         }
-        
+		
+//		let endTime = CFAbsoluteTimeGetCurrent() - startTime
+//		print("time execute for listenTracksSize: \(String.localizedStringWithFormat("%.2f", endTime))")
+		
         return fileSize
     }
 	

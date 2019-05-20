@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <SeekBar
+
+        android:id="@+id/listenSeekBar"
+        android:layout_width="426dp"
+        android:layout_height="29dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="-4dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginBottom="8dp"
+        android:max="10"
+        android:maxHeight="7dp"
+        android:minHeight="3dp"
+        android:progress="10"
+        android:progressDrawable="@drawable/ratio_slider"
+        android:thumb="@drawable/ic_tracks_ratio_seekbar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.703"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listenRatio"
+        app:layout_constraintVertical_bias="0.004"
+        android:theme="@style/SeekBarWithoutSteps"/>
+    <!--style="@style/Widget.AppCompat.SeekBar.Discrete"-->
+    <!--android:tickMark="@drawable/track_ratio_tickmark"-->
+    <TextView
+        android:id="@+id/listenRatio"
+        android:layout_width="344dp"
+        android:layout_height="21dp"
+        android:layout_marginLeft="17dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/ratio_pref"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/my_tracks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="17dp"
+        android:text="@string/myTracks"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listenSeekBar" />
+
+    <TextView
+        android:id="@+id/reccomended_tracks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="17dp"
+        android:text="@string/reccomendedTracks"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.972"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listenSeekBar" />
+
+</android.support.constraint.ConstraintLayout>

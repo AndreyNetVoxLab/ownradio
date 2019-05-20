@@ -70,13 +70,23 @@
 		<Preference android:title="@string/buy_sub"
 					android:key="buy_subscription">
 		</Preference>
+		<!--<Preference android:title="@string/tracks_ratio"-->
+					<!--android:key="tracks_listen_ratio">-->
+		<!--</Preference>-->
+		<ru.netvoxlab.ownradio.SeekBarPreference
+			android:key="tracks_listen_ratio">
+		</ru.netvoxlab.ownradio.SeekBarPreference>
 	</PreferenceCategory>
 	<PreferenceCategory
 		android:title="@string/pref_header_system_info"
 		android:key="pref_key_storage_settings"
 		android:layout="@layout/pref_header_title">
+		<!--<Preference-->
+			<!--android:title="@string/pref_header_system_info"-->
+			<!--android:key="sys_info"/>-->
 		<Preference
-			android:title="@string/pref_header_system_info"
-			android:key="sys_info"/>
+			android:key="go_to_debug_info"
+			android:title="Отладочная информация"
+			android:summary="Отладочная информация для разработчиков"/>
 	</PreferenceCategory>
 </PreferenceScreen>

@@ -42,7 +42,7 @@ class ApiService {
 			
 			if error != nil {
 				if self.countRequest < 10 {
-					Downloader.sharedInstance.load(isSelfFlag: false, complition: { 
+					Downloader.sharedInstance.runLoad(isSelf: false, complition: {
 						
 					})
 				}

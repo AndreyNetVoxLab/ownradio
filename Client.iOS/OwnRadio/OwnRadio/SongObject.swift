@@ -9,7 +9,8 @@
 
 import Foundation
 
-class SongObject: NSObject {
+class SongObject: NSObject, Codable{
+	
 	var name: String!
 	var artistName: String!
 	var trackID: String!

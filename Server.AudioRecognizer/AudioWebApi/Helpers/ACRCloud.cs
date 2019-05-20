@@ -102,6 +102,7 @@ namespace AudioWebApi
                 response.Status = ResponseStatus.OK;
                 response.Artist = GetArtists(result.Metadata.Musics);
                 response.Title = string.Join(",", result.Metadata.Musics.Select(x => x.Title).Distinct());
+                response.LimitExceeded = false;
             }
             else
             {
@@ -110,10 +111,19 @@ namespace AudioWebApi
                     case 1001:
                         Log.Warning("File not found");
                         response.Status = ResponseStatus.NotFound;
+                        response.LimitExceeded = false;
+                        break;
+                    case 3003:
+                        Log.Warning("Day limit exceed");
+                        response.Status = ResponseStatus.LimitExceeded;
+                        response.Artist = "";
+                        response.Title = "";
+                        response.LimitExceeded = true;
                         break;
                     case 3016:
                         Log.Warning("File is large");
                         response.Status = ResponseStatus.FileLarge;
+                        response.LimitExceeded = false;
                         break;
                 }
             }

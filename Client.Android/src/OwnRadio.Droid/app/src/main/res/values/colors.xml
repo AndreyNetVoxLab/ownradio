@@ -14,7 +14,7 @@
 	<color name="colorPrimaryToolbar">#9903A9F4</color>
 	
 	<color name="ColorPrimaryProgressBar">#0071bb</color>
-	<color name="ColorPrimaryProgressBarLine">#e5e5e5</color>
+	<color name="ColorPrimaryProgressBarLine">#E5E5E5</color>
 	
 	<color name="ColorPrimaryBtnPlay">#03A9F4</color>
 	
@@ -24,12 +24,12 @@
 	
 	<color name="ColorPrimaryBtn80">#ff03A9F4</color>
 	<color name="ColorPrimaryBtn70">#ff03A9F4</color>
-	<color name="ColorPrimaryBtn50">#ff03A9F4</color>
+	<color name="ColorPrimaryBtn50">#03A9F4</color>
 	<color name="ColorPrimaryBtnDisable">#838687</color>
 	<color name="ColorTransparent">#00ffffff</color>
 	
 	<!--button's circle colors-->
-	<color name="btnCircleColorPrimary">#ffffff</color>
+	<color name="btnCircleColorPrimary">#FFFFFF</color>
 
 
 	
@@ -41,7 +41,8 @@
 	<color name="bg_screen2">#20d2bb</color>
 	<color name="bg_screen3">#3395ff</color>
 	<color name="bg_screen4">#c873f4</color>
-	
+	<color name="real_white_color">#ffffff</color>
+
 	<!-- dots inactive colors -->
 	<color name="dot_dark_screen">#2278d4</color>
 	<color name="dot_dark_screen1">#d1395c</color>
@@ -76,9 +77,16 @@
 	<color name="pref_header_color">#ececec</color>
 	<color name="pref_title_color">#7a7a7a</color>
 	
+	<!--Main view-->
+	<color name="main_gray_color">#CCCCCC</color>
 
 	<!--slide-->
 	<color name="welcome_slider_text">#4c4070</color>
 	<color name="welcome_slider_text_2">#ec4234</color>
+	<color name="rate_no_button_color">#FFFFFF</color>
 
+
+	<!--Rate popup-->
+	<color name="rate_popup_color">#77000000</color>
+	<color name="transparent">#00FFFFFF</color>
 </resources>

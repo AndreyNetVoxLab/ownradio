@@ -11,6 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -37,21 +39,21 @@ public class DownloadTracks extends AsyncTask<Map<String, String>, Void, Boolean
 		try {
 			Response<ResponseBody> response;
 			if (trackMap[0].get("deviceid") == null)
-				response = ServiceGenerator.createService(APIService.class).getTrack(trackMap[0].get("id")).execute();
+				response = ServiceGenerator.createService(APIService.class).getTrack(trackMap[0].get("recid")).execute();
 			else
-			response = ServiceGenerator.createService(APIService.class).getTrackById(trackMap[0].get("id"), trackMap[0].get("deviceid")).execute();
+			response = ServiceGenerator.createService(APIService.class).getTrackById(trackMap[0].get("recid"), trackMap[0].get("deviceid")).execute();
 //			Response<ResponseBody> response = ServiceGenerator.createService(APIService.class).getTrackById(trackMap[0].get("id"), trackMap[0].get("deviceid")).execute();
 			if (response.isSuccessful()) {
 				Log.d(TAG, "server contacted and has file");
-				final String trackURL = ((App) mContext).getMusicDirectory() + File.separator + trackMap[0].get("id") + ".mp3";
+				final String trackURL = ((App) mContext).getMusicDirectory() + File.separator + trackMap[0].get("recid") + ".mp3";
 //				final String trackURL = mContext.getExternalFilesDir(Environment.DIRECTORY_MUSIC) + File.separator + trackMap[0].get("id") + ".mp3";
 				boolean writtenToDisk = WriteTrackToDisk2(trackURL, response.body());
 				
 				if (writtenToDisk == true) {
 					fileLength = new File(trackURL).length();
-					
+
 					ContentValues track = new ContentValues();
-					track.put("id", trackMap[0].get("id"));
+					track.put("id", trackMap[0].get("recid"));
 					track.put("trackurl", trackURL);
 					track.put("datetimelastlisten", "");
 					track.put("isexist", "1");
@@ -62,7 +64,7 @@ public class DownloadTracks extends AsyncTask<Map<String, String>, Void, Boolean
 					if (fileLength.equals(Long.valueOf(response.headers().get("Content-Length")))) {
 						
 						new TrackDataAccess(mContext).SaveTrack(track);
-						new Utilites().SendInformationTxt(mContext, "File " + trackMap[0].get("id") + " is load");
+						new Utilites().SendInformationTxt(mContext, "File " + trackMap[0].get("recid") + " is load");
 						
 						Intent in = new Intent(ActionTrackInfoUpdate);
 						mContext.sendBroadcast(in);

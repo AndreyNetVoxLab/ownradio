@@ -24,7 +24,35 @@
 	<android.support.constraint.ConstraintLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@android:color/white">
+		android:background="@android:color/white"
+		android:id="@+id/main_layout"
+		>
+
+		<ImageButton
+			android:id="@+id/rateAppBtn"
+			style="@style/RateButtonTheme"
+			android:layout_width="50dp"
+			android:layout_height="41dp"
+			android:layout_marginStart="8dp"
+			android:layout_marginEnd="24dp"
+			android:layout_marginBottom="12dp"
+			app:layout_constraintBottom_toTopOf="@+id/progressBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="1.0"
+			app:layout_constraintStart_toStartOf="parent"
+			app:srcCompat="@drawable/ic_star_popup" />
+
+		<ImageButton
+			android:id="@+id/buttonShareTrack4"
+			style="@style/Widget.AppCompat.ImageButton"
+			android:layout_width="46dp"
+			android:layout_height="37dp"
+			android:layout_marginTop="16dp"
+			android:layout_marginEnd="8dp"
+			android:background="@color/ColorTransparent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:srcCompat="@drawable/ic_share" />
 
 		<ViewStub
 			android:id="@+id/viewStubRate"
@@ -32,20 +60,21 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom"
 			android:inflatedId="@+id/rateRequestLayout"
-			android:layout="@layout/feedback_request_1"/>
+			android:layout="@layout/feedback_request_1" />
 
 		<ImageButton
 			android:id="@+id/btnMenu"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_marginStart="16dp"
+			android:layout_width="35dp"
+			android:layout_height="38dp"
+			android:layout_marginStart="24dp"
 			android:layout_marginTop="16dp"
 			android:background="?selectableItemBackgroundBorderless"
-			android:contentDescription="TODO" android:elevation="10dp"
+			android:contentDescription="TODO"
+			android:elevation="10dp"
 			android:tintMode="src_in"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toTopOf="parent"
-			app:srcCompat="@drawable/ic_menu_24dp"/>
+			app:srcCompat="@drawable/ic_menu_24dp" />
 
 		<TextView
 			android:id="@+id/trackTitle"
@@ -104,10 +133,11 @@
 			android:contentDescription="TODO"
 			android:elevation="10dp"
 			android:tintMode="src_in"
-			app:layout_constraintBottom_toTopOf="@+id/btnNext"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/trackArtist"
+			app:layout_constraintVertical_bias="0.31"
 			app:srcCompat="@drawable/btn_ic_play" />
 
 		<ImageButton
@@ -116,27 +146,15 @@
 			android:layout_height="106dp"
 			android:layout_alignParentEnd="true"
 			android:layout_centerVertical="true"
+			android:layout_marginTop="8dp"
 			android:background="?selectableItemBackgroundBorderless"
 			android:contentDescription="TODO"
 			android:elevation="10dp"
 			android:tintMode="src_in"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintStart_toStartOf="parent"
-			app:srcCompat="@drawable/btn_ic_next"
-			tools:layout_editor_absoluteY="484dp" />
-
-		<ImageView
-			android:layout_width="36dp"
-			android:layout_height="35dp"
-			android:layout_marginEnd="12dp"
-			android:layout_marginBottom="48dp"
-			android:contentDescription="TODO"
-			android:cropToPadding="false"
-			android:onClick="onCopyLink"
-			android:text="Copy"
-			app:layout_constraintBottom_toTopOf="@+id/trackTitle"
-			app:layout_constraintEnd_toEndOf="@+id/trackTitle"
-			app:srcCompat="@drawable/ic_share" />
+			app:layout_constraintTop_toBottomOf="@+id/btnPlayPause"
+			app:srcCompat="@drawable/btn_ic_next" />
 
 		<ImageButton
 			android:id="@+id/btnAlarmClock"
@@ -168,7 +186,7 @@
 			android:text="Наполнение кеша:"
 			android:visibility="gone"
 			app:layout_constraintStart_toStartOf="@+id/tProgressLeft"
-			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft"/>
+			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft" />
 
 		<ProgressBar
 			android:id="@+id/progressBar"
@@ -185,32 +203,33 @@
 			app:layout_constraintHorizontal_bias="0.0"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/btnNext"
-			app:layout_constraintVertical_bias="0.223" />
+			app:layout_constraintVertical_bias="0.52" />
 
 		<TextView
 			android:id="@+id/tProgressLeft"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			app:layout_constraintStart_toStartOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<TextView
 			android:id="@+id/tProgressRight"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textColor="@color/main_gray_color"
 			app:layout_constraintEnd_toEndOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<include
 			android:id="@+id/devInfo"
 			layout="@layout/content_main"
 			android:layout_width="match_parent"
 			android:layout_height="0dp"
-			android:layout_marginBottom="8dp"
 			android:layout_marginTop="8dp"
+			android:layout_marginBottom="8dp"
 			android:visibility="gone"
 			app:layout_constraintBottom_toBottomOf="parent"
-			app:layout_constraintTop_toBottomOf="@+id/trackArtist"/>
+			app:layout_constraintTop_toBottomOf="@+id/trackArtist" />
 	</android.support.constraint.ConstraintLayout>
 
 </android.support.v4.widget.DrawerLayout>

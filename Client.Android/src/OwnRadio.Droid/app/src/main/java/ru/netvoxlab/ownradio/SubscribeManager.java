@@ -62,9 +62,9 @@ public class SubscribeManager {
                     status = true;
                 } else {
                     prefManager.setPrefItemBool("is_subscribed", false);
-                    if(displayToast){
-                        Toast.makeText(context, "Подписка не оплачена, максимальный объем кэша 1Gb, заполнение кэша недоступно", Toast.LENGTH_LONG).show();
-                    }
+                    //if(displayToast){
+                      //  Toast.makeText(context, "Подписка не оплачена, максимальный объем кэша 1Gb, заполнение кэша недоступно", Toast.LENGTH_LONG).show();
+                    //}
                 }
             }
 

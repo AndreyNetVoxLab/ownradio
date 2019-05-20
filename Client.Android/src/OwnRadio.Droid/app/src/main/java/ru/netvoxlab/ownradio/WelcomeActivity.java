@@ -3,12 +3,14 @@ package ru.netvoxlab.ownradio;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -23,15 +25,18 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import ru.netvoxlab.ownradio.rdevapi.RdevApiCalls;
 import ru.netvoxlab.ownradio.receivers.NetworkStateReceiver;
 
 import static ru.netvoxlab.ownradio.RequestAPIService.ACTION_GETNEXTTRACK;
 import static ru.netvoxlab.ownradio.RequestAPIService.EXTRA_COUNT;
 import static ru.netvoxlab.ownradio.RequestAPIService.EXTRA_DEVICEID;
+import static ru.netvoxlab.ownradio.RequestAPIService.EXTRA_USERID;
 
 public class WelcomeActivity extends AppCompatActivity implements NetworkStateReceiver.NetworkStateReceiverListener{
 	
@@ -47,15 +52,17 @@ public class WelcomeActivity extends AppCompatActivity implements NetworkStateRe
 //	private VideoView videoView;
 	private Uri uriVideoView;
 	private String deviceId;
+	private String UserId;
 	final Handler loadHandler = new Handler();
 	private NetworkStateReceiver networkStateReceiver;
-	
+	SharedPreferences sp;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		//Меняем тему, используемую при запуске приложения, на основную
 		setTheme(R.style.AppTheme);
 		super.onCreate(savedInstanceState);
-		
+		this.sp = PreferenceManager.getDefaultSharedPreferences(this);
 		// Checking for first time launch - before calling setContentView()
 		prefManager = new PrefManager(this);
 		if (!prefManager.isFirstTimeLaunch()) {
@@ -75,8 +82,15 @@ public class WelcomeActivity extends AppCompatActivity implements NetworkStateRe
 				prefManager.setDeviceId(deviceId);
 				String UserName = "NewUser";
 				String DeviceName = Build.BRAND + " " + Build.PRODUCT;
-				new APICalls(getApplicationContext()).RegisterDevice(deviceId, DeviceName + " " + getApplicationContext().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA).versionName);
-				String UserId = new APICalls(this).GetUserId(deviceId);
+
+				//new APICalls(getApplicationContext()).RegisterDevice(deviceId, DeviceName + " " + getApplicationContext().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA).versionName);
+				RdevApiCalls rdevApiCalls = new RdevApiCalls(getApplicationContext());
+				//final Map<String, String> authMap = rdevApiCalls.GetAuthToken();
+				//String token = authMap.get("token");
+				rdevApiCalls.RegisterDevice(deviceId, DeviceName + " " + getApplicationContext().getPackageManager().getPackageInfo(getApplicationContext().getPackageName(), PackageManager.GET_META_DATA).versionName);
+
+				UserId = rdevApiCalls.GetDeviceInfo(deviceId).get("OK").getResult().get("userid");
+				//String UserId = new APICalls(this).GetUserId(deviceId);
 				prefManager.setPrefItem("UserID", UserId);
 				prefManager.setPrefItem("UserName", UserName);
 				prefManager.setPrefItem("DeviceName", DeviceName);
@@ -90,6 +104,7 @@ public class WelcomeActivity extends AppCompatActivity implements NetworkStateRe
 			Intent downloaderIntent = new Intent(this, LongRequestAPIService.class);
 			downloaderIntent.setAction(ACTION_GETNEXTTRACK);
 			downloaderIntent.putExtra(EXTRA_DEVICEID, deviceId);
+			downloaderIntent.putExtra(EXTRA_USERID, UserId);
 			downloaderIntent.putExtra(EXTRA_COUNT, 3);
 			startService(downloaderIntent);
 		}

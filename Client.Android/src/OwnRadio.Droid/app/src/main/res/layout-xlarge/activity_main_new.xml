@@ -24,7 +24,36 @@
 	<android.support.constraint.ConstraintLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:background="@android:color/white">
+		android:background="@android:color/white"
+		android:id="@+id/main_layout"
+		>
+
+		<ImageButton
+			android:id="@+id/rateAppBtn"
+			style="@style/RateButtonTheme"
+			android:layout_width="74dp"
+			android:layout_height="62dp"
+			android:layout_marginStart="8dp"
+			android:layout_marginEnd="24dp"
+			android:layout_marginBottom="8dp"
+			android:scaleType="center"
+			app:layout_constraintBottom_toTopOf="@+id/progressBar"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintHorizontal_bias="1.0"
+			app:layout_constraintStart_toStartOf="parent"
+			app:srcCompat="@drawable/ic_star_popup" />
+
+		<ImageButton
+			android:id="@+id/buttonShareTrack3"
+			style="@style/Widget.AppCompat.ImageButton"
+			android:layout_width="48dp"
+			android:layout_height="39dp"
+			android:layout_marginTop="16dp"
+			android:layout_marginEnd="24dp"
+			android:background="@color/ColorTransparent"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			app:srcCompat="@drawable/ic_share" />
 
 		<ViewStub
 			android:id="@+id/viewStubRate"
@@ -99,14 +128,20 @@
 			android:layout_alignParentStart="true"
 			android:layout_centerVertical="true"
 			android:layout_marginTop="148dp"
+			android:layout_marginBottom="8dp"
 			android:background="?selectableItemBackgroundBorderless"
 			android:contentDescription="TODO"
 			android:elevation="10dp"
+			android:scaleType="fitCenter"
+			android:scaleX="1.5"
+			android:scaleY="1.5"
 			android:tintMode="src_in"
+			app:layout_constraintBottom_toBottomOf="parent"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_bias="0.501"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/trackArtist"
+			app:layout_constraintVertical_bias="0.29000002"
 			app:srcCompat="@drawable/btn_ic_play" />
 
 		<ImageButton
@@ -115,28 +150,18 @@
 			android:layout_height="wrap_content"
 			android:layout_alignParentEnd="true"
 			android:layout_centerVertical="true"
-			android:layout_marginTop="40dp"
+			android:layout_marginTop="80dp"
 			android:background="?selectableItemBackgroundBorderless"
-			android:contentDescription="TODO" android:elevation="10dp"
+			android:contentDescription="TODO"
+			android:elevation="10dp"
+			android:scaleX="1.5"
+			android:scaleY="1.5"
 			android:tintMode="src_in"
 			app:layout_constraintEnd_toEndOf="parent"
 			app:layout_constraintHorizontal_bias="0.5"
 			app:layout_constraintStart_toStartOf="parent"
 			app:layout_constraintTop_toBottomOf="@+id/btnPlayPause"
-			app:srcCompat="@drawable/btn_ic_next"/>
-
-		<ImageView
-			android:layout_width="36dp"
-			android:layout_height="35dp"
-			android:layout_marginEnd="12dp"
-			android:layout_marginBottom="48dp"
-			android:contentDescription="TODO"
-			android:cropToPadding="false"
-			android:onClick="onCopyLink"
-			android:text="Copy"
-			app:layout_constraintBottom_toTopOf="@+id/trackTitle"
-			app:layout_constraintEnd_toEndOf="@+id/trackTitle"
-			app:srcCompat="@drawable/ic_share" />
+			app:srcCompat="@drawable/btn_ic_next" />
 
 		<ImageButton
 			android:id="@+id/btnAlarmClock"
@@ -145,6 +170,7 @@
 			android:layout_marginTop="8dp"
 			android:background="@android:color/white"
 			android:contentDescription="TODO"
+			android:scaleType="fitCenter"
 			app:layout_constraintStart_toStartOf="@+id/btnPlayPause"
 			app:layout_constraintTop_toBottomOf="@+id/tProgressLeft"
 			app:srcCompat="@drawable/ic_bud" />
@@ -157,6 +183,7 @@
 			android:layout_marginTop="8dp"
 			android:background="@android:color/white"
 			android:contentDescription="TODO"
+			android:scaleType="fitCenter"
 			app:layout_constraintEnd_toEndOf="@+id/btnPlayPause"
 			app:layout_constraintTop_toBottomOf="@+id/tProgressRight"
 			app:srcCompat="@drawable/ic_tim" />
@@ -192,15 +219,17 @@
 			android:id="@+id/tProgressLeft"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textColor="@color/main_gray_color"
 			app:layout_constraintStart_toStartOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<TextView
 			android:id="@+id/tProgressRight"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:textColor="@color/main_gray_color"
 			app:layout_constraintEnd_toEndOf="@+id/progressBar"
-			app:layout_constraintTop_toBottomOf="@+id/progressBar"/>
+			app:layout_constraintTop_toBottomOf="@+id/progressBar" />
 
 		<include
 			android:id="@+id/devInfo"

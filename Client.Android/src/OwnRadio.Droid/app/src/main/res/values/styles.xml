@@ -27,4 +27,28 @@
 		<item name="android:windowBackground">@android:color/white</item>
 		<!--<item name="android:windowBackground">@drawable/launch_screen</item>-->
 	</style>
+	<style name="yesRateButton" parent="ThemeOverlay.AppCompat">
+		<item name="colorAccent">@color/ColorPrimaryBtnPlay</item>
+	</style>
+	<style name="noRateButton" parent="ThemeOverlay.AppCompat">
+		<item name="colorAccent">@android:color/holo_red_dark</item>
+	</style>
+	<style name="AppTheme.RatePopupTheme">
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowCloseOnTouchOutside">true</item>
+		<!--<item name="android:background">#31DDDDDD</item>-->
+	</style>
+
+	<style name="RateButtonTheme">
+		<item name="android:background">@drawable/rate_button_drawable</item>
+	</style>
+
+	<style name="ClosePopupStyle">
+		<item name="android:background">@drawable/close_popup_button_drawable</item>
+	</style>
+
+	<style name="SeekBarWithoutSteps" parent="Base.Widget.AppCompat.SeekBar.Discrete">
+		<item name="tickMark">@null</item>
+	</style>
+
 </resources>

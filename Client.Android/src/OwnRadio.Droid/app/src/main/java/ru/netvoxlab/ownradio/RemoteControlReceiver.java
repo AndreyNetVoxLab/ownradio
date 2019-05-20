@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.view.KeyEvent;
 
 import java.util.List;
@@ -78,6 +79,10 @@ public class RemoteControlReceiver extends BroadcastReceiver {
 		playbackWithHSisInterrupted = false;
 		Intent remoteIntent = new Intent(context, MediaPlayerService.class);
 		remoteIntent.setAction(action);
-		context.startService(remoteIntent);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			context.startForegroundService(remoteIntent);
+		}else{
+			context.startService(remoteIntent);
+		}
 	}
 }

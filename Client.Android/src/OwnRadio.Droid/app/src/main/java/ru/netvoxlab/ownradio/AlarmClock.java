@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
@@ -111,7 +112,13 @@ public class AlarmClock extends AppCompatActivity {
 		
 		// инициализируем все компоненты
 		imageView = findViewById(R.id.imageView);
-		
+		imageView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				btnStartClock(v);
+			}
+		});
+
 		txtProgress = findViewById(R.id.txtProgress);
 		
 		txtMonday = findViewById(R.id.txtMonday);
@@ -148,7 +155,8 @@ public class AlarmClock extends AppCompatActivity {
 		seekBarVolume.setEnabled(checkVolume.isChecked());
 		
 		txtVolumePercent.setText(volumePercent + " %");
-		
+
+
 		initialNumbers(); // загружаем цифры для часов, минут.
 		
 		initialComponents(); // загружаем все настройки
@@ -184,7 +192,7 @@ public class AlarmClock extends AppCompatActivity {
 		};
 		
 		numberHours.setOnValueChangedListener(timeVCListener);
-		
+
 		numberMinutes.setOnValueChangedListener(timeVCListener);
 		
 		musicTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
@@ -204,7 +212,7 @@ public class AlarmClock extends AppCompatActivity {
 					txtCurrentPlayTrack.setText(title);
 				}
 			}
-			
+
 			@Override
 			public void onFinish() {
 			
@@ -304,9 +312,44 @@ public class AlarmClock extends AppCompatActivity {
 	private void setNewDay(String time) {
 		int hours = TimePreference.getHour(time);
 		int mins = TimePreference.getMinute(time);
-		
-		String timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime());
-		
+
+		String timesCurrent = "";
+		if(android.os.Build.VERSION.SDK_INT >= 24){
+			timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime());
+		}
+		else{
+			Date d = new Date();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(d);
+			int dow = cal.get(Calendar.DAY_OF_WEEK);
+			switch (dow) {
+				case Calendar.SUNDAY:
+					dow = 7;
+					break;
+				case Calendar.MONDAY:
+					dow = 1;
+					break;
+				case Calendar.TUESDAY:
+					dow = 2;
+					break;
+				case Calendar.WEDNESDAY:
+					dow = 3;
+					break;
+				case Calendar.THURSDAY:
+					dow = 4;
+					break;
+				case Calendar.FRIDAY:
+					dow = 5;
+					break;
+				case Calendar.SATURDAY:
+					dow = 6;
+					break;
+			}
+			timesCurrent = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+			timesCurrent = String.valueOf(dow) + ":" + timesCurrent;
+		}
+
+
 		String[] curTimes = timesCurrent.split(":");
 		
 		int day = Integer.valueOf(curTimes[0]); // день недели
@@ -660,8 +703,42 @@ public class AlarmClock extends AppCompatActivity {
 	private void startTimer(final SharedPreferences.Editor prefEditor) {
 		String time = numberHours.getValue() + ":" + numberMinutes.getValue();
 		boolean isRestart = restartAlarm(time);
-		
-		String timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime());
+
+		String timesCurrent = "";
+		if(android.os.Build.VERSION.SDK_INT >= 24){
+			timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime());
+		}
+		else{
+			Date d = new Date();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(d);
+			int dow = cal.get(Calendar.DAY_OF_WEEK);
+			switch (dow) {
+				case Calendar.SUNDAY:
+					dow = 7;
+					break;
+				case Calendar.MONDAY:
+					dow = 1;
+					break;
+				case Calendar.TUESDAY:
+					dow = 2;
+					break;
+				case Calendar.WEDNESDAY:
+					dow = 3;
+					break;
+				case Calendar.THURSDAY:
+					dow = 4;
+					break;
+				case Calendar.FRIDAY:
+					dow = 5;
+					break;
+				case Calendar.SATURDAY:
+					dow = 6;
+					break;
+			}
+			timesCurrent = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+			timesCurrent = String.valueOf(dow) + ":" + timesCurrent;
+		}
 		
 		String[] curTimes = timesCurrent.split(":");
 		
@@ -740,7 +817,10 @@ public class AlarmClock extends AppCompatActivity {
 		
 		timer.start();
 	}
-	
+
+
+
+
 	public void btnStartClock(View view) {
 		SharedPreferences.Editor prefEditor = prefs.edit();
 		
@@ -900,8 +980,42 @@ public class AlarmClock extends AppCompatActivity {
 		
 		int hours = TimePreference.getHour(time); // получаем часы
 		int mins = TimePreference.getMinute(time); // получаем минуты
-		
-		String timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime()); // полуаем текущее время и день
+
+		String timesCurrent = "";
+		if(android.os.Build.VERSION.SDK_INT >= 24){
+			timesCurrent = new SimpleDateFormat("u:HH:mm").format(Calendar.getInstance().getTime());
+		}
+		else{
+			Date d = new Date();
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(d);
+			int dow = cal.get(Calendar.DAY_OF_WEEK);
+			switch (dow) {
+				case Calendar.SUNDAY:
+					dow = 7;
+					break;
+				case Calendar.MONDAY:
+					dow = 1;
+					break;
+				case Calendar.TUESDAY:
+					dow = 2;
+					break;
+				case Calendar.WEDNESDAY:
+					dow = 3;
+					break;
+				case Calendar.THURSDAY:
+					dow = 4;
+					break;
+				case Calendar.FRIDAY:
+					dow = 5;
+					break;
+				case Calendar.SATURDAY:
+					dow = 6;
+					break;
+			}
+			timesCurrent = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
+			timesCurrent = String.valueOf(dow) + ":" + timesCurrent;
+		}
 		
 		String[] curTimes = timesCurrent.split(":");
 		
