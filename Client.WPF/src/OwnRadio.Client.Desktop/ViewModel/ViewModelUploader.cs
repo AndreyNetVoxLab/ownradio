@@ -7,11 +7,14 @@ using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using Newtonsoft.Json;
 using OwnRadio.Client.Desktop.Properties;
 using OwnRadio.Client.Desktop.ViewModel.Commands;
 
@@ -153,6 +156,130 @@ namespace OwnRadio.Client.Desktop.ViewModel
 			}
 		}
 
+		public async void UploadRdevFiles()
+		{
+			int queued = UploadQueue.Count(s => !s.Uploaded);
+			int uploaded = 0;
+			ShowMessage("Uploading..");
+			Status = $"Uploaded: {uploaded}/{queued}";
+
+			SetCurrentValue(IsUploadedProperty, false);
+			SetCurrentValue(IsUploadingProperty, true);
+			SetCurrentValue(InfoProperty, "Visible");
+
+			try
+			{
+				//получаем токен для админа
+				var httpClient = new HttpClient();
+				var url = "http://localhost:5001/auth/login";
+				var body = "{login:\"admin\", password: \"2128506\"}";
+				var content = new StringContent(body, Encoding.UTF8, "application/json");
+				var response = httpClient.PostAsync(url, content).Result;
+				var userInfo = response.Content.ReadAsStringAsync().Result;
+				dynamic token = JsonConvert.DeserializeObject(userInfo);
+				var tokenValue = token.token;
+				httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenValue.ToString());
+
+				//грузим файлы
+				foreach (var musicFile in UploadQueue.Where(s => !s.Uploaded))
+				{
+
+					var fullFileName = musicFile.FilePath + "\\" + musicFile.FileName;
+
+					var fileStream = File.OpenRead(fullFileName);
+					var byteArray = new byte[fileStream.Length];
+					fileStream.Read(byteArray, 0, (int)fileStream.Length);
+					fileStream.Close();
+
+
+					var fle = TagLib.File.Create(fullFileName);
+
+					Guid recid = Guid.NewGuid();
+
+					var request = new UploadFileDto()
+					{
+						Method = "uploadaudiofile"
+					};
+
+					var files = new List<FileDescription>()
+					{
+						new FileDescription()
+						{
+							RecId = recid,
+							DeviceId = Guid.Parse("66666666-6666-6666-6666-666666666666"),
+							Recdescription = "TrackUploaded",
+							Mediatype = "track",
+							LocalDevicePathUpload = fullFileName,
+							Name = fle.Tag.Title,
+							Content = Convert.ToBase64String(byteArray),
+							Size = byteArray.Length / 1024,
+							Artist = fle.Tag.FirstPerformer,
+							Length = (int)Math.Round(fle.Properties.Duration.TotalSeconds, 0),
+							Uploaduserid = Guid.Parse("66666666-6666-6666-6666-666666666666")
+						}
+					};
+
+					request.Fields = new FilesItemDto() { files = files };
+
+					string json = JsonConvert.SerializeObject(request);
+					content = new StringContent(json, Encoding.UTF8, "application/json");
+
+					url = "http://localhost:5001/api/executejs";
+					// Выполняем запрос на Rdev
+
+					var response2 = await httpClient.PostAsync(url, content);
+
+					if (response2.StatusCode != HttpStatusCode.OK)
+						//throw new Exception(await response.Content.ReadAsStringAsync());
+						continue;
+
+					_dal.MarkAsUploaded(musicFile);
+					Status = $"Uploaded: {queued - UploadQueue.Count(s => !s.Uploaded)}/{queued}";
+					++uploaded;
+				}
+				httpClient.Dispose();
+
+				ShowMessage(uploaded > 0 ? "Files uploaded successfully" : "Empty queue");
+			}
+			catch (Exception ex)
+			{
+				ShowMessage(ex.Message);
+			}
+
+			SetCurrentValue(IsUploadedProperty, true);
+			SetCurrentValue(IsUploadingProperty, false);
+		}
+
+		public struct FileDescription
+		{
+			public Guid RecId { get; set; }
+			public Guid DeviceId { get; set; }
+			public Guid Uploaduserid { get; set; }
+			public string Recdescription { get; set; }
+			public string Mediatype { get; set; }
+			public int Chapter { get; set; }
+			public string Name { get; set; }
+			public Guid Ownerrecid { get; set; }
+			public string LocalDevicePathUpload { get; set; }
+			public string Content { get; set; }
+			public int Size { get; set; }
+			public string Outersource { get; set; }
+			public string Artist { get; set; }
+			public int Length { get; set; }
+
+		}
+
+		public struct FilesItemDto
+		{
+			public ICollection<FileDescription> files { get; set; }
+		}
+
+		public class UploadFileDto
+		{
+			public string Method { get; set; }
+			public FilesItemDto Fields { get; set; }
+		}
+
 		public async void UploadFiles()
 		{
 			int queued = UploadQueue.Count(s => !s.Uploaded);
@@ -225,8 +352,11 @@ namespace OwnRadio.Client.Desktop.ViewModel
 			}
 
 			GetQueue(dialog.SelectedPath);
-			UploadFiles();
+			//UploadFiles();
+			UploadRdevFiles();
 		}
+
+		
 
 		private async Task<bool> IsExist(Guid guid)
 		{

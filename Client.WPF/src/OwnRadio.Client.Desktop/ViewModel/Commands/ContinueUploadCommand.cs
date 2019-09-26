@@ -24,8 +24,8 @@ namespace OwnRadio.Client.Desktop.ViewModel.Commands
 
 		public void Execute(object parameter)
 		{
-			if (Uploader.UploadQueue.Count(s => !s.Uploaded) > 0)
-				Uploader.UploadFiles();
+			//if (Uploader.UploadQueue.Count(s => !s.Uploaded) > 0)
+			//	Uploader.UploadRdevFiles();
 		}
 	}
 }
