@@ -166,12 +166,12 @@ namespace OwnRadio.Client.Desktop.ViewModel
 			SetCurrentValue(IsUploadedProperty, false);
 			SetCurrentValue(IsUploadingProperty, true);
 			SetCurrentValue(InfoProperty, "Visible");
-
+			var serverUrl = "http://localhost:5001";
 			try
 			{
 				//получаем токен для админа
 				var httpClient = new HttpClient();
-				var url = "http://localhost:5001/auth/login";
+				var url = serverUrl + "/auth/login";
 				var body = "{login:\"admin\", password: \"2128506\"}";
 				var content = new StringContent(body, Encoding.UTF8, "application/json");
 				var response = httpClient.PostAsync(url, content).Result;
@@ -185,6 +185,12 @@ namespace OwnRadio.Client.Desktop.ViewModel
 				{
 
 					var fullFileName = musicFile.FilePath + "\\" + musicFile.FileName;
+
+					////проверяем есть ли файл уже по полному пути в базе
+					//url = serverUrl + "/odata/tracks?$filter=(localdevicepathupload eq "+ fullFileName + ")";
+					//var check = httpClient.GetAsync(url).Result;
+					//var checkbody = check.Content.ReadAsStringAsync().Result;
+
 
 					var fileStream = File.OpenRead(fullFileName);
 					var byteArray = new byte[fileStream.Length];
@@ -215,7 +221,7 @@ namespace OwnRadio.Client.Desktop.ViewModel
 							Size = byteArray.Length / 1024,
 							Artist = fle.Tag.FirstPerformer,
 							Length = (int)Math.Round(fle.Properties.Duration.TotalSeconds, 0),
-							Uploaduserid = Guid.Parse("66666666-6666-6666-6666-666666666666")
+							Uploaduserid = Guid.Parse("11111111-0000-0035-0000-000000000000")
 						}
 					};
 
@@ -224,13 +230,14 @@ namespace OwnRadio.Client.Desktop.ViewModel
 					string json = JsonConvert.SerializeObject(request);
 					content = new StringContent(json, Encoding.UTF8, "application/json");
 
-					url = "http://localhost:5001/api/executejs";
+					url = serverUrl + "/api/executejs";
 					// Выполняем запрос на Rdev
 
 					var response2 = await httpClient.PostAsync(url, content);
 
 					if (response2.StatusCode != HttpStatusCode.OK)
 						//throw new Exception(await response.Content.ReadAsStringAsync());
+						//musicFile.FullFilePath = musicFile.FilePath + "\\" + musicFile.FileName + " - ошибка";
 						continue;
 
 					_dal.MarkAsUploaded(musicFile);
