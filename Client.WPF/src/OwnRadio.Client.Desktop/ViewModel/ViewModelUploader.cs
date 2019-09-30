@@ -197,7 +197,7 @@ namespace OwnRadio.Client.Desktop.ViewModel
 					fileStream.Read(byteArray, 0, (int)fileStream.Length);
 					fileStream.Close();
 
-
+					//читаем тэги из mp3 файла
 					var fle = TagLib.File.Create(fullFileName);
 
 					Guid recid = Guid.NewGuid();
@@ -232,7 +232,6 @@ namespace OwnRadio.Client.Desktop.ViewModel
 
 					url = serverUrl + "/api/executejs";
 					// Выполняем запрос на Rdev
-
 					var response2 = await httpClient.PostAsync(url, content);
 
 					if (response2.StatusCode != HttpStatusCode.OK)
